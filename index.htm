@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kopi Sahaja - POS Kasir</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.js"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+
+    <div id="login-screen" class="fixed inset-0 bg-gray-900 bg-opacity-80 flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-2xl shadow-xl max-w-sm w-full mx-4">
+            <h2 class="text-2xl font-bold mb-2 text-center text-amber-800">☕ Kopi Sahaja</h2>
+            <p class="text-sm text-gray-500 text-center mb-6">Silakan login shift untuk memulai</p>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Nama Kasir</label>
+                    <input type="text" id="shift-username" class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-amber-500" placeholder="Contoh: Barista Ahmad">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Modal Awal (Rp)</label>
+                    <input type="number" id="shift-cash" class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-amber-500" value="50000">
+                </div>
+                <button onclick="startShift()" class="w-full bg-amber-700 hover:bg-amber-800 text-white font-semibold py-2.5 rounded-lg transition">Mulai Shift Kasir</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="min-h-screen flex flex-col">
+        <header class="bg-amber-800 text-white px-6 py-4 flex justify-between items-center shadow-md">
+            <div>
+                <h1 class="text-xl font-bold tracking-wide">☕ KOPI SAHAJA POS</h1>
+                <p id="cashier-display" class="text-xs text-amber-200">Kasir: -</p>
+            </div>
+            <button onclick="endShift()" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-sm font-medium transition">Akhiri Shift</button>
+        </header>
+
+        <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 p-6">
+            <div class="lg:col-span-7 space-y-6">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                    <h3 class="text-lg font-bold mb-4 text-amber-900 flex items-center gap-2">➕ Input / Update Menu Barang</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <input type="text" id="prod-name" placeholder="Nama Menu" class="border rounded-lg p-2 text-sm">
+                        <input type="number" id="prod-price" placeholder="Harga (Rp)" class="border rounded-lg p-2 text-sm">
+                        <input type="number" id="prod-stock" placeholder="Stok Awal" class="border rounded-lg p-2 text-sm">
+                        <button onclick="saveProduct()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg p-2 transition">Simpan Barang</button>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex-1">
+                    <h3 class="text-lg font-bold mb-4 text-amber-900">📋 Menu Kedai Kopi</h3>
+                    <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-4"></div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-5 space-y-6">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col h-full justify-between">
+                    <div>
+                        <h3 class="text-lg font-bold mb-4 text-amber-900 border-b pb-2">🛒 Keranjang Belanja</h3>
+                        <div id="cart-items" class="space-y-3 max-h-60 overflow-y-auto mb-4">
+                            <p class="text-gray-400 text-sm text-center py-4">Belum ada item terpilih</p>
+                        </div>
+                    </div>
+
+                    <div class="border-t pt-4 space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600 font-medium">Total Tagihan:</span>
+                            <span id="total-price-display" class="text-2xl font-black text-amber-900">Rp 0</span>
+                        </div>
+
+                        <div class="bg-amber-50 p-4 rounded-xl border border-amber-200">
+                            <h4 class="text-xs font-bold text-amber-800 uppercase tracking-wider mb-2">🧮 Kalkulator Kembalian Otomatis</h4>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs text-gray-500 mb-1">Uang Dibayar (Rp)</label>
+                                    <input type="number" id="cash-received" oninput="calculateChange()" class="w-full bg-white border border-amber-300 rounded-lg p-2 font-bold text-lg focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="0">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-500 mb-1">Kembalian (Rp)</label>
+                                    <input type="text" id="cash-change" class="w-full bg-amber-100 border border-amber-200 rounded-lg p-2 font-bold text-lg text-amber-900" value="Rp 0" readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Metode Pembayaran</label>
+                            <select id="payment-method" onchange="togglePaymentMethod()" class="w-full border rounded-lg p-2">
+                                <option value="Tunai">Tunai</option>
+                                <option value="QRIS">QRIS (Wajib Foto Bukti)</option>
+                            </select>
+                        </div>
+
+                        <div id="qris-camera-section" class="hidden space-y-2">
+                            <label class="block text-sm font-medium text-amber-900">📸 Kamera Bukti QRIS</label>
+                            <video id="video" class="w-full h-40 object-cover rounded-lg bg-black" autoplay playsinline></video>
+                            <button id="capture-btn" onclick="capturePhoto()" class="w-full bg-blue-600 text-white text-xs py-2 rounded-lg font-medium hover:bg-blue-700">Ambil Foto Bukti</button>
+                            <canvas id="canvas" class="hidden"></canvas>
+                            <div id="photo-preview-container" class="hidden">
+                                <p class="text-xs text-green-600 font-medium">✓ Foto berhasil dikunci</p>
+                                <img id="photo-preview" class="w-full h-32 object-cover rounded-lg border mt-1">
+                            </div>
+                        </div>
+
+                        <button onclick="submitTransaction()" class="w-full bg-amber-800 hover:bg-amber-900 text-white font-bold py-3 rounded-xl transition shadow-md">Selesaikan Pembayaran</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. MASUKKAN KREDENSIAL SUPABASE KAMU DI SINI ---
+        const SUPABASE_URL = "MASUKKAN_PROJECT_URL_KAMU_DISINI"; 
+        const SUPABASE_ANON_KEY = "MASUKKAN_ANON_PUBLIC_KEY_KAMU_DISINI";
+
+        // Variabel Global
+        let supabaseClient = null;
+        let currentShiftId = null;
+        let currentCashier = "";
+        let cart = {};
+        let totalPrice = 0;
+        let blobPhotoQRIS = null;
+        let streamObj = null;
+
+        // --- 2. INISIALISASI KONEKSI (DENGAN PROTEKSI ERROR) ---
+        try {
+            if (typeof window.supabase === 'undefined') {
+                alert("❌ Gagal memuat library Supabase dari internet. Periksa koneksi wifi/internet Anda!");
+            } else {
+                // Sesuai dokumentasi CDN UMD, inisialisasi menggunakan window.supabase.createClient
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            }
+        } catch (initError) {
+            alert("❌ Error Konfigurasi URL/KEY Supabase: " + initError.message);
+        }
+
+        // --- 3. FUNGSI LOGIN / MULAI SHIFT KASIR ---
+        async function startShift() {
+            const username = document.getElementById('shift-username').value.trim();
+            const initialCash = parseInt(document.getElementById('shift-cash').value) || 0;
+
+            if(!username) {
+                alert("Nama Kasir wajib diisi!");
+                return;
+            }
+
+            if(!supabaseClient) {
+                alert("Sistem database belum siap. Cek kembali URL dan KEY Supabase Anda.");
+                return;
+            }
+
+            try {
+                // Jalankan insert data ke tabel shifts
+                const { data, error } = await supabaseClient.from('shifts').insert([
+                    { cashier_name: username, initial_cash: initialCash, status: 'open' }
+                ]).select('*');
+
+                if (error) {
+                    alert("⚠️ Gagal ke Database! Alasan: " + error.message + "\n\n(Pastikan RLS di tabel 'shifts' sudah RLS IS DISABLED di Supabase)");
+                    return;
+                }
+
+                if (data && data.length > 0) {
+                    currentShiftId = data[0].id;
+                    currentCashier = username;
+
+                    // Berhasil masuk, ubah tampilan UI
+                    document.getElementById('cashier-display').innerText = `Kasir Bertugas: ${username}`;
+                    document.getElementById('login-screen').classList.add('hidden');
+                    loadProducts();
+                } else {
+                    alert("Gagal memulai shift. Data kosong atau tidak tersimpan.");
+                }
+
+            } catch (err) {
+                alert("💥 Terjadi Kesalahan Fatal Sistem: " + err.message);
+            }
+        }
+
+        // --- 4. LOAD PRODUK ---
+        async function loadProducts() {
+            try {
+                const { data, error } = await supabaseClient.from('products').select('*');
+                if (error) return alert("Gagal mengambil data menu: " + error.message);
+
+                const grid = document.getElementById('product-grid');
+                grid.innerHTML = '';
+
+                if(data.length === 0) {
+                    grid.innerHTML = '<p class="text-gray-400 text-sm col-span-3 text-center py-4">Belum ada menu. Silakan input di atas.</p>';
+                    return;
+                }
+
+                data.forEach(prod => {
+                    grid.innerHTML += `
+                        <div class="border p-4 rounded-xl bg-gray-50 flex flex-col justify-between hover:shadow-sm transition">
+                            <div>
+                                <h4 class="font-bold text-gray-900">${prod.name}</h4>
+                                <p class="text-sm text-amber-800 font-semibold">Rp ${prod.price.toLocaleString()}</p>
+                                <p class="text-xs text-gray-400">Stok: ${prod.stock}</p>
+                            </div>
+                            <button onclick="addToCart('${prod.id}', '${prod.name}', ${prod.price}, ${prod.stock})" class="mt-3 bg-amber-100 text-amber-900 hover:bg-amber-800 hover:text-white text-xs font-bold py-1.5 rounded-lg transition">+ Tambah</button>
+                        </div>
+                    `;
+                });
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        // --- 5. INPUT BARANG BARU ---
+        async function saveProduct() {
+            const name = document.getElementById('prod-name').value.trim();
+            const price = parseInt(document.getElementById('prod-price').value);
+            const stock = parseInt(document.getElementById('prod-stock').value) || 0;
+
+            if(!name || !price) return alert("Nama Menu dan Harga wajib diisi!");
+
+            try {
+                const { error } = await supabaseClient.from('products').upsert({ name, price, stock }, { onConflict: 'name' });
+                if(error) return alert("Gagal simpan produk: " + error.message + "\n(Cek apakah tabel 'products' sudah RLS disabled)");
+
+                alert("Barang berhasil disimpan!");
+                document.getElementById('prod-name').value = '';
+                document.getElementById('prod-price').value = '';
+                document.getElementById('prod-stock').value = '';
+                loadProducts();
+            } catch (err) {
+                alert("Error input barang: " + err.message);
+            }
+        }
+
+        // --- 6. MANAJEMEN KERANJANG ---
+        function addToCart(id, name, price, maxStock) {
+            if (cart[id]) {
+                if(cart[id].qty >= maxStock) return alert("Stok menu tidak mencukupi!");
+                cart[id].qty++;
+            } else {
+                cart[id] = { name, price, qty: 1 };
+            }
+            renderCart();
+        }
+
+        function removeFromCart(id) {
+            delete cart[id];
+            renderCart();
+        }
+
+        function renderCart() {
+            const container = document.getElementById('cart-items');
+            container.innerHTML = '';
+            totalPrice = 0;
+
+            Object.keys(cart).forEach(id => {
+                const item = cart[id];
+                const subtotal = item.price * item.qty;
+                totalPrice += subtotal;
+
+                container.innerHTML += `
+                    <div class="flex justify-between items-center bg-gray-50 p-2.5 rounded-lg border text-sm">
+                        <div>
+                            <p class="font-semibold text-gray-900">${item.name}</p>
+                            <p class="text-xs text-gray-500">${item.qty} x Rp ${item.price.toLocaleString()}</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="font-bold text-amber-900">Rp ${subtotal.toLocaleString()}</span>
+                            <button onclick="removeFromCart('${id}')" class="text-red-500 hover:text-red-700 font-bold">✕</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            if(Object.keys(cart).length === 0) {
+                container.innerHTML = `<p class="text-gray-400 text-sm text-center py-4">Belum ada item terpilih</p>`;
+            }
+
+            document.getElementById('total-price-display').innerText = `Rp ${totalPrice.toLocaleString()}`;
+            calculateChange();
+        }
+
+        // --- 7. KALKULATOR OTOMATIS KEMBALIAN ---
+        function calculateChange() {
+            const cashReceivedInput = document.getElementById('cash-received').value;
+            const cashReceived = parseInt(cashReceivedInput) || 0;
+            const changeField = document.getElementById('cash-change');
+
+            if (cashReceivedInput === "") {
+                changeField.value = "Rp 0";
+                changeField.style.color = "inherit";
+                return;
+            }
+
+            const change = cashReceived - totalPrice;
+
+            if (change >= 0) {
+                changeField.value = `Rp ${change.toLocaleString()}`;
+                changeField.style.color = "green";
+            } else {
+                changeField.value = `Kurang: Rp ${Math.abs(change).toLocaleString()}`;
+                changeField.style.color = "red";
+            }
+        }
+
+        // --- 8. FITUR KAMERA QRIS ---
+        async function togglePaymentMethod() {
+            const method = document.getElementById('payment-method').value;
+            const cameraSection = document.getElementById('qris-camera-section');
+
+            if(method === "QRIS") {
+                cameraSection.classList.remove('hidden');
+                try {
+                    streamObj = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
+                    document.getElementById('video').srcObject = streamObj;
+                } catch (err) {
+                    alert("Kamera tidak dapat diakses: " + err.message);
+                }
+            } else {
+                cameraSection.classList.add('hidden');
+                stopCamera();
+            }
+        }
+
+        function stopCamera() {
+            if(streamObj) {
+                streamObj.getTracks().forEach(track => track.stop());
+                streamObj = null;
+            }
+        }
+
+        function capturePhoto() {
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            const preview = document.getElementById('photo-preview');
+            const previewContainer = document.getElementById('photo-preview-container');
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const dataUrl = canvas.toDataURL('image/png');
+            preview.src = dataUrl;
+            previewContainer.classList.remove('hidden');
+
+            canvas.toBlob(blob => { blobPhotoQRIS = blob; }, 'image/png');
+        }
+
+        // --- 9. SELESAIKAN PEMBAYARAN ---
+        async function submitTransaction() {
+            if(Object.keys(cart).length === 0) return alert("Keranjang belanja kosong!");
+            
+            const method = document.getElementById('payment-method').value;
+            const cashReceived = parseInt(document.getElementById('cash-received').value) || 0;
+            
+            if (method === "Tunai" && cashReceived < totalPrice) {
+                return alert("Uang pembayaran kurang!");
+            }
+
+            let qrisUrl = null;
+
+            try {
+                if (method === "QRIS") {
+                    if(!blobPhotoQRIS) return alert("Wajib foto bukti transfer QRIS!");
+                    
+                    const fileName = `qris_${Date.now()}.png`;
+                    const { data: uploadData, error: uploadErr } = await supabaseClient.storage
+                        .from('qris-evidence')
+                        .upload(fileName, blobPhotoQRIS, { contentType: 'image/png' });
+
+                    if(uploadErr) return alert("Gagal upload gambar: " + uploadErr.message);
+                    
+                    const { data: urlData } = supabaseClient.storage.from('qris-evidence').getPublicUrl(fileName);
+                    qrisUrl = urlData.publicUrl;
+                }
+
+                // Masukkan transaksi
+                const { error: txError } = await supabaseClient.from('transactions').insert([{
+                    shift_id: currentShiftId,
+                    total_price: totalPrice,
+                    payment_method: method,
+                    qris_evidence_url: qrisUrl
+                }]);
+
+                if(txError) return alert("Gagal transaksi: " + txError.message);
+
+                alert("🎉 Transaksi Berhasil Disimpan!");
+                cart = {};
+                blobPhotoQRIS = null;
+                document.getElementById('cash-received').value = '';
+                document.getElementById('photo-preview-container').classList.add('hidden');
+                renderCart();
+                stopCamera();
+                document.getElementById('payment-method').value = "Tunai";
+                document.getElementById('qris-camera-section').classList.add('hidden');
+                loadProducts();
+            } catch (err) {
+                alert("Error penyelesaian transaksi: " + err.message);
+            }
+        }
+
+        // --- 10. AKHIRI SHIFT ---
+        async function endShift() {
+            if(!currentShiftId) return;
+            if(!confirm("Akhiri shift sekarang?")) return;
+
+            try {
+                await supabaseClient.from('shifts').update({
+                    status: 'closed',
+                    end_time: new Date().toISOString()
+                }).eq('id', currentShiftId);
+
+                currentShiftId = null;
+                currentCashier = "";
+                cart = {};
+                renderCart();
+                stopCamera();
+                document.getElementById('login-screen').classList.remove('hidden');
+            } catch (e) {
+                alert(e.message);
+            }
+        }
+    </script>
+</body>
+</html>

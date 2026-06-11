@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kopi Sahaja - POS Kasir</title>
+    <title>Kopi Sahaja - POS Kasir & Rekap</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.js"></script>
 </head>
@@ -11,45 +11,56 @@
 
     <div id="login-screen" class="fixed inset-0 bg-gray-900 bg-opacity-80 flex items-center justify-center z-50">
         <div class="bg-white p-8 rounded-2xl shadow-xl max-w-sm w-full mx-4">
-            <h2 class="text-2xl font-bold mb-2 text-center text-amber-800">☕ Kopi Sahaja</h2>
+            <h2 class="text-2xl font-bold mb-2 text-center text-rose-950">☕ Kopi Sahaja</h2>
             <p class="text-sm text-gray-500 text-center mb-6">Silakan login shift untuk memulai</p>
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium mb-1">Nama Kasir</label>
-                    <input type="text" id="shift-username" class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-amber-500" placeholder="Contoh: Barista Ahmad">
+                    <label class="block text-sm font-medium mb-1">Nama Kasir & Shift</label>
+                    <input type="text" id="shift-username" class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-rose-800" placeholder="Contoh: Shift Pagi (Ahmad)">
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1">Modal Awal (Rp)</label>
-                    <input type="number" id="shift-cash" class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-amber-500" value="50000">
+                    <input type="number" id="shift-cash" class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-rose-800" value="50000">
                 </div>
-                <button onclick="startShift()" class="w-full bg-amber-700 hover:bg-amber-800 text-white font-semibold py-2.5 rounded-lg transition">Mulai Shift Kasir</button>
+                <button onclick="startShift()" class="w-full bg-rose-900 hover:bg-rose-950 text-white font-semibold py-2.5 rounded-lg transition shadow-md">Mulai Shift Kasir</button>
             </div>
         </div>
     </div>
 
     <div class="min-h-screen flex flex-col">
-        <header class="bg-amber-800 text-white px-6 py-4 flex justify-between items-center shadow-md">
+        <header class="bg-rose-950 text-white px-6 py-4 flex justify-between items-center shadow-md">
             <div>
                 <h1 class="text-xl font-bold tracking-wide">☕ KOPI SAHAJA POS</h1>
-                <p id="cashier-display" class="text-xs text-amber-200">Kasir: -</p>
+                <p id="cashier-display" class="text-xs text-rose-200">Kasir: -</p>
             </div>
-            <button onclick="endShift()" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-sm font-medium transition">Akhiri Shift</button>
+            <div class="flex items-center gap-4">
+                <nav class="flex bg-rose-950 rounded-lg p-1 text-sm font-medium border border-rose-800">
+                    <button onclick="switchTab('pos')" id="tab-pos-btn" class="bg-rose-800 text-white px-4 py-1.5 rounded-md">🛒 Kasir</button>
+                    <button onclick="switchTab('rekap'); loadShiftReport();" id="tab-rekap-btn" class="text-rose-200 px-4 py-1.5 rounded-md hover:text-white">📊 Statistik & Rekap WA</button>
+                </nav>
+                <button onclick="endShift()" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-sm font-medium transition">Akhiri Shift</button>
+            </div>
         </header>
 
-        <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 p-6">
+        <div id="tab-pos" class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 p-6">
             <div class="lg:col-span-7 space-y-6">
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-                    <h3 class="text-lg font-bold mb-4 text-amber-900 flex items-center gap-2">➕ Input / Update Menu Barang</h3>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <input type="text" id="prod-name" placeholder="Nama Menu" class="border rounded-lg p-2 text-sm">
+                    <h3 class="text-lg font-bold mb-4 text-rose-950 flex items-center gap-2">➕ Input / Update Menu Barang</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+                        <input type="text" id="prod-name" placeholder="Nama Menu" class="border rounded-lg p-2 text-sm col-span-2">
                         <input type="number" id="prod-price" placeholder="Harga (Rp)" class="border rounded-lg p-2 text-sm">
-                        <input type="number" id="prod-stock" placeholder="Stok Awal" class="border rounded-lg p-2 text-sm">
-                        <button onclick="saveProduct()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg p-2 transition">Simpan Barang</button>
+                        <input type="number" id="prod-stock" placeholder="Stok" class="border rounded-lg p-2 text-sm">
+                        <select id="prod-category" class="border rounded-lg p-2 text-sm bg-white">
+                            <option value="UTAMA">Menu Utama</option>
+                            <option value="JAJANAN">Jajanan</option>
+                            <option value="ROKOK">Rokok</option>
+                        </select>
+                        <button onclick="saveProduct()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg p-2 transition col-span-2 md:col-span-5">Simpan Barang</button>
                     </div>
                 </div>
 
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex-1">
-                    <h3 class="text-lg font-bold mb-4 text-amber-900">📋 Menu Kedai Kopi</h3>
+                    <h3 class="text-lg font-bold mb-4 text-rose-950">📋 Menu Kedai Kopi</h3>
                     <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-4"></div>
                 </div>
             </div>
@@ -57,7 +68,7 @@
             <div class="lg:col-span-5 space-y-6">
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col h-full justify-between">
                     <div>
-                        <h3 class="text-lg font-bold mb-4 text-amber-900 border-b pb-2">🛒 Keranjang Belanja</h3>
+                        <h3 class="text-lg font-bold mb-4 text-rose-950 border-b pb-2">🛒 Keranjang Belanja</h3>
                         <div id="cart-items" class="space-y-3 max-h-60 overflow-y-auto mb-4">
                             <p class="text-gray-400 text-sm text-center py-4">Belum ada item terpilih</p>
                         </div>
@@ -66,19 +77,19 @@
                     <div class="border-t pt-4 space-y-4">
                         <div class="flex justify-between items-center">
                             <span class="text-gray-600 font-medium">Total Tagihan:</span>
-                            <span id="total-price-display" class="text-2xl font-black text-amber-900">Rp 0</span>
+                            <span id="total-price-display" class="text-2xl font-black text-rose-950">Rp 0</span>
                         </div>
 
-                        <div class="bg-amber-50 p-4 rounded-xl border border-amber-200">
-                            <h4 class="text-xs font-bold text-amber-800 uppercase tracking-wider mb-2">🧮 Kalkulator Kembalian Otomatis</h4>
+                        <div class="bg-rose-50 p-4 rounded-xl border border-rose-200">
+                            <h4 class="text-xs font-bold text-rose-900 uppercase tracking-wider mb-2">🧮 Kalkulator Kembalian Otomatis</h4>
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
                                     <label class="block text-xs text-gray-500 mb-1">Uang Dibayar (Rp)</label>
-                                    <input type="number" id="cash-received" oninput="calculateChange()" class="w-full bg-white border border-amber-300 rounded-lg p-2 font-bold text-lg focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="0">
+                                    <input type="number" id="cash-received" oninput="calculateChange()" class="w-full bg-white border border-rose-300 rounded-lg p-2 font-bold text-lg focus:outline-none focus:ring-2 focus:ring-rose-800" placeholder="0">
                                 </div>
                                 <div>
                                     <label class="block text-xs text-gray-500 mb-1">Kembalian (Rp)</label>
-                                    <input type="text" id="cash-change" class="w-full bg-amber-100 border border-amber-200 rounded-lg p-2 font-bold text-lg text-amber-900" value="Rp 0" readonly>
+                                    <input type="text" id="cash-change" class="w-full bg-rose-100 border border-rose-200 rounded-lg p-2 font-bold text-lg text-rose-950" value="Rp 0" readonly>
                                 </div>
                             </div>
                         </div>
@@ -92,7 +103,7 @@
                         </div>
 
                         <div id="qris-camera-section" class="hidden space-y-2">
-                            <label class="block text-sm font-medium text-amber-900">📸 Kamera Bukti QRIS</label>
+                            <label class="block text-sm font-medium text-rose-950">📸 Kamera Bukti QRIS</label>
                             <video id="video" class="w-full h-40 object-cover rounded-lg bg-black" autoplay playsinline></video>
                             <button id="capture-btn" onclick="capturePhoto()" class="w-full bg-blue-600 text-white text-xs py-2 rounded-lg font-medium hover:bg-blue-700">Ambil Foto Bukti</button>
                             <canvas id="canvas" class="hidden"></canvas>
@@ -102,17 +113,61 @@
                             </div>
                         </div>
 
-                        <button onclick="submitTransaction()" class="w-full bg-amber-800 hover:bg-amber-900 text-white font-bold py-3 rounded-xl transition shadow-md">Selesaikan Pembayaran</button>
+                        <button onclick="submitTransaction()" class="w-full bg-rose-900 hover:bg-rose-950 text-white font-bold py-3 rounded-xl transition shadow-md">Selesaikan Pembayaran</button>
                     </div>
                 </div>
             </div>
         </div>
+
+        <div id="tab-rekap" class="hidden p-6 space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border space-y-4">
+                    <div class="flex justify-between items-center border-b pb-3">
+                        <h3 class="text-lg font-bold text-rose-950">📝 Preview Format Laporan WhatsApp</h3>
+                        <button onclick="sendToWhatsApp()" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-xl flex items-center gap-2 transition text-sm shadow-sm">
+                            💬 Kirim Rekap ke WA
+                        </button>
+                    </div>
+                    <div class="bg-red-50 p-4 rounded-xl border border-red-200 flex items-center justify-between gap-4">
+                        <span class="text-sm font-medium text-red-800">Ada Pengeluaran Toko saat Shift ini?</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm text-gray-500">Rp</span>
+                            <input type="number" id="input-pengeluaran" oninput="updateReportPreview()" value="0" class="border bg-white rounded-lg p-1.5 w-32 font-bold">
+                        </div>
+                    </div>
+                    <pre id="wa-text-preview" class="bg-gray-900 text-green-400 p-5 rounded-xl font-mono text-sm whitespace-pre-wrap overflow-x-auto shadow-inner"></pre>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">📊 Live Statistik Keuangan</h3>
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center p-3 bg-rose-50 rounded-xl">
+                                <span class="text-sm font-medium text-rose-950">Total Pendapatan</span>
+                                <span id="stat-pendapatan" class="font-black text-rose-950 text-lg">Rp 0</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-blue-50 rounded-xl">
+                                <span class="text-sm font-medium text-blue-900">Uang Masuk QRIS</span>
+                                <span id="stat-qris" class="font-bold text-blue-900">Rp 0</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-emerald-50 rounded-xl">
+                                <span class="text-sm font-medium text-emerald-900">Uang Masuk Cash</span>
+                                <span id="stat-cash" class="font-bold text-emerald-900">Rp 0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
     </div>
 
     <script>
         // --- 1. MASUKKAN KREDENSIAL SUPABASE KAMU DI SINI ---
-       const SUPABASE_URL = "https://wbrznvzpckcgvzbowqoe.supabase.co"; 
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndicnpudnpwY2tjZ3Z6Ym93cW9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNjA4NDYsImV4cCI6MjA5NjczNjg0Nn0.G1WMuzagPFqQURfcGuCZfTjqz2FLBr8eN3pJUdHQuOk";
+        const SUPABASE_URL = "YOUR_SUPABASE_URL"; 
+        const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
 
         // Variabel Global
         let supabaseClient = null;
@@ -123,65 +178,70 @@
         let blobPhotoQRIS = null;
         let streamObj = null;
 
-        // --- 2. INISIALISASI KONEKSI (DENGAN PROTEKSI ERROR) ---
+        let reportData = {
+            cashierName: "",
+            items: {},
+            revenue: 0,
+            qris: 0,
+            cash: 0
+        };
+
+        // Inisialisasi Koneksi
         try {
-            if (typeof window.supabase === 'undefined') {
-                alert("❌ Gagal memuat library Supabase dari internet. Periksa koneksi wifi/internet Anda!");
-            } else {
-                // Sesuai dokumentasi CDN UMD, inisialisasi menggunakan window.supabase.createClient
+            if (typeof window.supabase !== 'undefined') {
                 supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            } else {
+                alert("❌ Gagal memuat library Supabase!");
             }
         } catch (initError) {
-            alert("❌ Error Konfigurasi URL/KEY Supabase: " + initError.message);
+            alert("❌ Error Konfigurasi Supabase: " + initError.message);
         }
 
-        // --- 3. FUNGSI LOGIN / MULAI SHIFT KASIR ---
+        // Navigasi Tab UI
+        function switchTab(tabName) {
+            if (tabName === 'pos') {
+                document.getElementById('tab-pos').classList.remove('hidden');
+                document.getElementById('tab-rekap').classList.add('hidden');
+                document.getElementById('tab-pos-btn').className = "bg-rose-800 text-white px-4 py-1.5 rounded-md";
+                document.getElementById('tab-rekap-btn').className = "text-rose-200 px-4 py-1.5 rounded-md hover:text-white";
+            } else {
+                document.getElementById('tab-pos').classList.add('hidden');
+                document.getElementById('tab-rekap').classList.remove('hidden');
+                document.getElementById('tab-pos-btn').className = "text-rose-200 px-4 py-1.5 rounded-md hover:text-white";
+                document.getElementById('tab-rekap-btn').className = "bg-rose-800 text-white px-4 py-1.5 rounded-md";
+            }
+        }
+
+        // Login / Mulai Shift Kasir
         async function startShift() {
             const username = document.getElementById('shift-username').value.trim();
             const initialCash = parseInt(document.getElementById('shift-cash').value) || 0;
 
-            if(!username) {
-                alert("Nama Kasir wajib diisi!");
-                return;
-            }
-
-            if(!supabaseClient) {
-                alert("Sistem database belum siap. Cek kembali URL dan KEY Supabase Anda.");
-                return;
-            }
+            if(!username) return alert("Nama Kasir/Shift wajib diisi!");
 
             try {
-                // Jalankan insert data ke tabel shifts
                 const { data, error } = await supabaseClient.from('shifts').insert([
                     { cashier_name: username, initial_cash: initialCash, status: 'open' }
                 ]).select('*');
 
-                if (error) {
-                    alert("⚠️ Gagal ke Database! Alasan: " + error.message + "\n\n(Pastikan RLS di tabel 'shifts' sudah RLS IS DISABLED di Supabase)");
-                    return;
-                }
+                if (error) return alert("⚠️ Gagal ke Database! Alasan: " + error.message);
 
                 if (data && data.length > 0) {
                     currentShiftId = data[0].id;
                     currentCashier = username;
-
-                    // Berhasil masuk, ubah tampilan UI
                     document.getElementById('cashier-display').innerText = `Kasir Bertugas: ${username}`;
                     document.getElementById('login-screen').classList.add('hidden');
                     loadProducts();
-                } else {
-                    alert("Gagal memulai shift. Data kosong atau tidak tersimpan.");
                 }
-
             } catch (err) {
-                alert("💥 Terjadi Kesalahan Fatal Sistem: " + err.message);
+                alert("💥 Terjadi Kesalahan: " + err.message);
             }
         }
 
-        // --- 4. LOAD PRODUK ---
+        // Load Produk dari Supabase
         async function loadProducts() {
             try {
-                const { data, error } = await supabaseClient.from('products').select('*');
+                const { data, error } = await supabaseClient.from('products').select('*').order('name', { ascending: true });
                 if (error) return alert("Gagal mengambil data menu: " + error.message);
 
                 const grid = document.getElementById('product-grid');
@@ -194,44 +254,42 @@
 
                 data.forEach(prod => {
                     grid.innerHTML += `
-                        <div class="border p-4 rounded-xl bg-gray-50 flex flex-col justify-between hover:shadow-sm transition">
+                        <div class="border p-3.5 rounded-xl bg-gray-50 flex flex-col justify-between hover:shadow-sm transition">
                             <div>
-                                <h4 class="font-bold text-gray-900">${prod.name}</h4>
-                                <p class="text-sm text-amber-800 font-semibold">Rp ${prod.price.toLocaleString()}</p>
-                                <p class="text-xs text-gray-400">Stok: ${prod.stock}</p>
+                                <span class="bg-rose-100 text-rose-950 font-bold px-1.5 py-0.5 rounded text-[10px] uppercase">${prod.category || 'UTAMA'}</span>
+                                <h4 class="font-bold text-gray-900 mt-1">${prod.name}</h4>
+                                <p class="text-xs text-rose-900 font-semibold">Rp ${prod.price.toLocaleString()}</p>
+                                <p class="text-[11px] text-gray-400">Stok: ${prod.stock}</p>
                             </div>
-                            <button onclick="addToCart('${prod.id}', '${prod.name}', ${prod.price}, ${prod.stock})" class="mt-3 bg-amber-100 text-amber-900 hover:bg-amber-800 hover:text-white text-xs font-bold py-1.5 rounded-lg transition">+ Tambah</button>
+                            <button onclick="addToCart('${prod.id}', '${prod.name}', ${prod.price}, ${prod.stock})" class="mt-2 bg-rose-900 text-white hover:bg-rose-950 text-xs font-bold py-1.5 rounded-lg transition">+ Tambah</button>
                         </div>
                     `;
                 });
-            } catch (e) {
-                console.error(e);
-            }
+            } catch (e) { console.error(e); }
         }
 
-        // --- 5. INPUT BARANG BARU ---
+        // Input / Update Barang Baru
         async function saveProduct() {
             const name = document.getElementById('prod-name').value.trim();
             const price = parseInt(document.getElementById('prod-price').value);
             const stock = parseInt(document.getElementById('prod-stock').value) || 0;
+            const category = document.getElementById('prod-category').value;
 
             if(!name || !price) return alert("Nama Menu dan Harga wajib diisi!");
 
             try {
-                const { error } = await supabaseClient.from('products').upsert({ name, price, stock }, { onConflict: 'name' });
-                if(error) return alert("Gagal simpan produk: " + error.message + "\n(Cek apakah tabel 'products' sudah RLS disabled)");
+                const { error } = await supabaseClient.from('products').upsert({ name, price, stock, category }, { onConflict: 'name' });
+                if(error) return alert("Gagal simpan produk: " + error.message);
 
                 alert("Barang berhasil disimpan!");
                 document.getElementById('prod-name').value = '';
                 document.getElementById('prod-price').value = '';
                 document.getElementById('prod-stock').value = '';
                 loadProducts();
-            } catch (err) {
-                alert("Error input barang: " + err.message);
-            }
+            } catch (err) { alert("Error: " + err.message); }
         }
 
-        // --- 6. MANAJEMEN KERANJANG ---
+        // Manajemen Keranjang Belanja
         function addToCart(id, name, price, maxStock) {
             if (cart[id]) {
                 if(cart[id].qty >= maxStock) return alert("Stok menu tidak mencukupi!");
@@ -264,7 +322,7 @@
                             <p class="text-xs text-gray-500">${item.qty} x Rp ${item.price.toLocaleString()}</p>
                         </div>
                         <div class="flex items-center gap-3">
-                            <span class="font-bold text-amber-900">Rp ${subtotal.toLocaleString()}</span>
+                            <span class="font-bold text-rose-950">Rp ${subtotal.toLocaleString()}</span>
                             <button onclick="removeFromCart('${id}')" class="text-red-500 hover:text-red-700 font-bold">✕</button>
                         </div>
                     </div>
@@ -279,7 +337,7 @@
             calculateChange();
         }
 
-        // --- 7. KALKULATOR OTOMATIS KEMBALIAN ---
+        // KALKULATOR OTOMATIS KEMBALIAN
         function calculateChange() {
             const cashReceivedInput = document.getElementById('cash-received').value;
             const cashReceived = parseInt(cashReceivedInput) || 0;
@@ -302,7 +360,7 @@
             }
         }
 
-        // --- 8. FITUR KAMERA QRIS ---
+        // Fitur Kamera QRIS
         async function togglePaymentMethod() {
             const method = document.getElementById('payment-method').value;
             const cameraSection = document.getElementById('qris-camera-section');
@@ -312,9 +370,7 @@
                 try {
                     streamObj = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
                     document.getElementById('video').srcObject = streamObj;
-                } catch (err) {
-                    alert("Kamera tidak dapat diakses: " + err.message);
-                }
+                } catch (err) { alert("Kamera tidak dapat diakses: " + err.message); }
             } else {
                 cameraSection.classList.add('hidden');
                 stopCamera();
@@ -346,7 +402,7 @@
             canvas.toBlob(blob => { blobPhotoQRIS = blob; }, 'image/png');
         }
 
-        // --- 9. SELESAIKAN PEMBAYARAN ---
+        // Selesaikan Transaksi Pembayaran
         async function submitTransaction() {
             if(Object.keys(cart).length === 0) return alert("Keranjang belanja kosong!");
             
@@ -374,15 +430,25 @@
                     qrisUrl = urlData.publicUrl;
                 }
 
-                // Masukkan transaksi
-                const { error: txError } = await supabaseClient.from('transactions').insert([{
+                const { data: txData, error: txError } = await supabaseClient.from('transactions').insert([{
                     shift_id: currentShiftId,
                     total_price: totalPrice,
                     payment_method: method,
                     qris_evidence_url: qrisUrl
-                }]);
+                }]).select();
 
                 if(txError) return alert("Gagal transaksi: " + txError.message);
+
+                for (const id of Object.keys(cart)) {
+                    const item = cart[id];
+                    const currentProd = await supabaseClient.from('products').select('stock').eq('id', id).single();
+                    const newStock = (currentProd.data?.stock || 0) - item.qty;
+                    await supabaseClient.from('products').update({ stock: newStock }).eq('id', id);
+                }
+
+                const { data: shiftData } = await supabaseClient.from('shifts').select('total_revenue').eq('id', currentShiftId).single();
+                const currentRevenue = shiftData?.total_revenue || 0;
+                await supabaseClient.from('shifts').update({ total_revenue: currentRevenue + totalPrice }).eq('id', currentShiftId);
 
                 alert("🎉 Transaksi Berhasil Disimpan!");
                 cart = {};
@@ -394,31 +460,110 @@
                 document.getElementById('payment-method').value = "Tunai";
                 document.getElementById('qris-camera-section').classList.add('hidden');
                 loadProducts();
-            } catch (err) {
-                alert("Error penyelesaian transaksi: " + err.message);
-            }
+            } catch (err) { alert("Error: " + err.message); }
         }
 
-        // --- 10. AKHIRI SHIFT ---
+        // --- SISTEM OTOMATIS REKAP DATA & FORMAT WHATSAPP ---
+        async function loadShiftReport() {
+            if(!currentShiftId) return;
+
+            try {
+                const { data: allProducts } = await supabaseClient.from('products').select('name, category');
+                let productCategoryMap = {};
+                let allItemsFormat = {};
+
+                allProducts.forEach(p => {
+                    productCategoryMap[p.name] = p.category || "UTAMA";
+                    allItemsFormat[p.name] = { qty: "", category: p.category || "UTAMA" }; 
+                });
+
+                const { data: txList, error } = await supabaseClient.from('transactions').select('*').eq('shift_id', currentShiftId);
+                if(error) return alert("Gagal memuat rekap: " + error.message);
+
+                let totalRevenue = 0;
+                let totalQris = 0;
+                let totalCash = 0;
+
+                txList.forEach(tx => {
+                    totalRevenue += tx.total_price;
+                    if(tx.payment_method === "QRIS") {
+                        totalQris += tx.total_price;
+                    } else {
+                        totalCash += tx.total_price;
+                    }
+                });
+                
+                reportData.cashierName = currentCashier;
+                reportData.revenue = totalRevenue;
+                reportData.qris = totalQris;
+                reportData.cash = totalCash;
+                reportData.items = allItemsFormat;
+
+                updateReportPreview();
+
+                document.getElementById('stat-pendapatan').innerText = `Rp ${totalRevenue.toLocaleString()}`;
+                document.getElementById('stat-qris').innerText = `Rp ${totalQris.toLocaleString()}`;
+                document.getElementById('stat-cash').innerText = `Rp ${totalCash.toLocaleString()}`;
+
+            } catch (err) { console.error(err); }
+        }
+
+        function updateReportPreview() {
+            const pengeluaranInput = parseInt(document.getElementById('input-pengeluaran').value) || 0;
+            
+            const opsiTanggal = { day: 'numeric', month: 'long', year: 'numeric' };
+            const tanggalHariIni = new Date().toLocaleDateString('id-ID', opsiTanggal);
+
+            let txt = `*Laporan Keuangan ${reportData.cashierName} ${tanggalHariIni}*\n\n`;
+
+            const kategoriList = ["UTAMA", "JAJANAN", "ROKOK"];
+            
+            kategoriList.forEach(kat => {
+                if(kat === "JAJANAN") txt += `*JAJANAN*\n`;
+                if(kat === "ROKOK") txt += `*ROKOK*\n`;
+
+                Object.keys(reportData.items).forEach(itemName => {
+                    const item = reportData.items[itemName];
+                    if(item.category === kat) {
+                        const qtyDisplay = item.qty ? item.qty : "";
+                        txt += `- ${itemName} : ${qtyDisplay}\n`;
+                    }
+                });
+                txt += `\n`;
+            });
+
+            const totalBersih = reportData.revenue - pengeluaranInput;
+
+            txt += `*Pendapatan  : ${reportData.revenue.toLocaleString('id-ID')}*\n`;
+            txt += `*Qris                 : ${reportData.qris.toLocaleString('id-ID')}*\n`;
+            txt += `*Cash               : ${reportData.cash.toLocaleString('id-ID')}*\n`;
+            txt += `*Pengeluaran : ${pengeluaranInput > 0 ? pengeluaranInput.toLocaleString('id-ID') : '-'}*\n`;
+            txt += `*Total                : ${totalBersih.toLocaleString('id-ID')}*`;
+
+            document.getElementById('wa-text-preview').innerText = txt;
+        }
+
+        function sendToWhatsApp() {
+            const textReport = document.getElementById('wa-text-preview').innerText;
+            const urlEncodedText = encodeURIComponent(textReport);
+            window.open(`https://api.whatsapp.com/send?text=${urlEncodedText}`, '_blank');
+        }
+
+        // Akhiri Shift Kerja
         async function endShift() {
             if(!currentShiftId) return;
             if(!confirm("Akhiri shift sekarang?")) return;
 
             try {
-                await supabaseClient.from('shifts').update({
-                    status: 'closed',
-                    end_time: new Date().toISOString()
-                }).eq('id', currentShiftId);
-
+                await supabaseClient.from('shifts').update({ status: 'closed', end_time: new Date().toISOString() }).eq('id', currentShiftId);
                 currentShiftId = null;
                 currentCashier = "";
                 cart = {};
                 renderCart();
                 stopCamera();
                 document.getElementById('login-screen').classList.remove('hidden');
-            } catch (e) {
-                alert(e.message);
-            }
+                switchTab('pos');
+            } catch (e) { alert(e.message); }
         }
     </script>
 </body>

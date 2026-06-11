@@ -129,24 +129,48 @@
         let streamObj = null;
 
         // 1. Shift Login
-        async function startShift() {
-            const username = document.getElementById('shift-username').value;
-            const initialCash = parseInt(document.getElementById('shift-cash').value) || 0;
+       // --- UPDATE FUNGSI LOGIN SHIFT YANG BENAR & AMAN ---
+async function startShift() {
+    const username = document.getElementById('shift-username').value;
+    const initialCash = parseInt(document.getElementById('shift-cash').value) || 0;
 
-            if(!username) return alert("Nama Kasir wajib diisi!");
+    if(!username) {
+        alert("Nama Kasir wajib diisi!");
+        return;
+    }
 
-            const { data, error } = await supabase.from('shifts').insert([
-                { cashier_name: username, initial_cash: initialCash, status: 'open' }
-            ]).select();
+    try {
+        // Proses input data shift baru ke Supabase
+        const { data, error } = await supabase.from('shifts').insert([
+            { cashier_name: username, initial_cash: initialCash, status: 'open' }
+        ]).select('*'); // Wajib pakai '*' agar datanya dikembalikan penuh
 
-            if (error) return alert("Gagal membuka shift database: " + error.message);
+        // Jika ada error dari database, langsung munculkan pop-up alert
+        if (error) {
+            alert("Gagal koneksi ke database: " + error.message);
+            return;
+        }
 
+        // Validasi jika data berhasil masuk
+        if (data && data.length > 0) {
             currentShiftId = data[0].id;
             currentCashier = username;
 
+            // Ganti tampilan UI ke halaman Kasir Utama
             document.getElementById('cashier-display').innerText = `Kasir Bertugas: ${username}`;
             document.getElementById('login-screen').classList.add('hidden');
+            
+            // Muat produk dari database
             loadProducts();
+        } else {
+            alert("Gagal memulai shift. Data tidak dikembalikan oleh database.");
+        }
+
+    } catch (err) {
+        // Menangkap error coding / network jika koneksi internet putus
+        alert("Terjadi kesalahan sistem: " + err.message);
+    }
+}
         }
 
         // 2. Load Produk dari Supabase

@@ -1,0 +1,7 @@
+{
+  "name": "pos-kopi-sahaja",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "echo 'No build steps needed'"
+  }
+}

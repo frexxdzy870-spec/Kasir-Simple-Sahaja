@@ -71,9 +71,9 @@
                         <input type="number" id="prod-price" placeholder="Harga (Rp)" class="border border-amber-200 bg-amber-50/20 rounded-xl p-2.5 text-sm font-medium focus:outline-none focus:border-[#b30b0b]">
                         <input type="number" id="prod-stock" placeholder="Stok" class="border border-amber-200 bg-amber-50/20 rounded-xl p-2.5 text-sm font-medium focus:outline-none focus:border-[#b30b0b]">
                         <select id="prod-category" class="border border-amber-200 bg-white rounded-xl p-2.5 text-sm font-bold text-amber-900 focus:outline-none focus:border-[#b30b0b]">
-                            <option value="UTAMA">Utama ☕</option>
-                            <option value="JAJANAN">Jajanan 🍿</option>
-                            <option value="ROKOK">Rokok 🚬</option>
+                            <option value="UTAMA">Utama</option>
+                            <option value="JAJANAN">Jajanan</option>
+                            <option value="ROKOK">Rokok</option>
                         </select>
                         <button onclick="saveProduct()" class="bg-[#b30b0b] hover:bg-[#a00606] text-[#fef2cc] text-sm font-bold rounded-xl p-2.5 transition col-span-2 md:col-span-5 shadow-md">Simpan ke Katalog Menu</button>
                     </div>
@@ -86,10 +86,10 @@
                         
                         <!-- FILTER CATEGORY BUTTONS -->
                         <div class="flex flex-wrap gap-1 bg-amber-50 p-1 rounded-xl text-xs font-bold border border-amber-100/60">
-                            <button onclick="filterMenu('ALL')" id="filter-all" class="bg-[#b30b0b] text-[#fef2cc] px-3 py-2 rounded-lg shadow-sm transition">🌟 Semua</button>
-                            <button onclick="filterMenu('UTAMA')" id="filter-utama" class="text-amber-900 hover:bg-white px-3 py-2 rounded-lg transition">☕ Utama</button>
-                            <button onclick="filterMenu('JAJANAN')" id="filter-jajanan" class="text-amber-900 hover:bg-white px-3 py-2 rounded-lg transition">🍿 Jajanan</button>
-                            <button onclick="filterMenu('ROKOK')" id="filter-rokok" class="text-amber-900 hover:bg-white px-3 py-2 rounded-lg transition">🚬 Rokok</button>
+                            <button onclick="filterMenu('ALL')" id="filter-all" class="bg-[#b30b0b] text-[#fef2cc] px-3 py-2 rounded-lg shadow-sm transition">Semua</button>
+                            <button onclick="filterMenu('UTAMA')" id="filter-utama" class="text-amber-900 hover:bg-white px-3 py-2 rounded-lg transition">Utama</button>
+                            <button onclick="filterMenu('JAJANAN')" id="filter-jajanan" class="text-amber-900 hover:bg-white px-3 py-2 rounded-lg transition">Jajanan</button>
+                            <button onclick="filterMenu('ROKOK')" id="filter-rokok" class="text-amber-900 hover:bg-white px-3 py-2 rounded-lg transition">Rokok</button>
                         </div>
                     </div>
                     

@@ -3,47 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kopi Sahaja - POS Kasir Maroon</title>
+    <title>Kedai Kopi Sahaja - POS System</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- Supabase JS CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.js"></script>
 </head>
-<body class="bg-gray-50 text-gray-800 font-sans">
+<body class="bg-amber-50/40 text-gray-800 font-sans">
 
     <!-- LOGIN & SHIFT SCREEN -->
-    <div id="login-screen" class="fixed inset-0 bg-gray-900 bg-opacity-80 flex items-center justify-center z-50">
-        <div class="bg-white p-8 rounded-2xl shadow-xl max-w-sm w-full mx-4">
-            <h2 class="text-2xl font-bold mb-2 text-center text-rose-950">☕ Kopi Sahaja</h2>
-            <p class="text-sm text-gray-500 text-center mb-6">Silakan login shift untuk memulai</p>
+    <div id="login-screen" class="fixed inset-0 bg-[#a00606] flex items-center justify-center z-50 p-4">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl max-w-sm w-full border-4 border-[#fef2cc] relative overflow-hidden">
+            <!-- Dekorasi Aksen Bunga -->
+            <div class="absolute -right-6 -top-6 text-4xl opacity-20 select-none">🌻</div>
+            <div class="absolute -left-6 -bottom-6 text-4xl opacity-20 select-none">🌻</div>
+            
+            <div class="flex flex-col items-center mb-6">
+                <!-- Placeholder Logo baru terintegrasi secara visual -->
+                <div class="w-24 h-24 bg-[#b30b0b] rounded-2xl flex flex-col items-center justify-center p-2 border-2 border-[#fef2cc] shadow-md mb-3 relative">
+                    <span class="text-[9px] font-black text-[#fef2cc] leading-none text-center tracking-tight">KEDAI<br>KOPI<br>SAHAJA.</span>
+                    <span class="absolute bottom-1 right-1 text-xs">🌻</span>
+                </div>
+                <h2 class="text-2xl font-black text-[#a00606] tracking-tight">KEDAI KOPI SAHAJA.</h2>
+                <p class="text-xs text-amber-700/70 font-medium mt-1">Sistem Kasir & Manajemen Shift</p>
+            </div>
+
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium mb-1">Nama Kasir & Shift</label>
-                    <input type="text" id="shift-username" class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-rose-800" placeholder="Contoh: Shift Pagi (Ahmad)">
+                    <label class="block text-xs font-bold uppercase tracking-wider text-amber-900 mb-1">Nama Kasir & Shift</label>
+                    <input type="text" id="shift-username" class="w-full border-2 border-amber-200 rounded-xl p-3 bg-amber-50/30 focus:outline-none focus:border-[#b30b0b] font-medium transition" placeholder="Contoh: Shift Pagi (Ahmad)">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Modal Awal (Rp)</label>
-                    <input type="number" id="shift-cash" class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-rose-800" value="50000">
-                </div>
-                <button onclick="startShift()" class="w-full bg-rose-900 hover:bg-rose-950 text-white font-semibold py-2.5 rounded-lg transition shadow-md">Mulai Shift Kasir</button>
+                <button onclick="startShift()" class="w-full bg-[#b30b0b] hover:bg-[#a00606] text-[#fef2cc] font-bold py-3 rounded-xl transition shadow-lg hover:shadow-xl active:scale-[0.98] tracking-wide">Mulai Shift Kasir 🌻</button>
             </div>
         </div>
     </div>
 
     <!-- MAIN APP INTERFACE -->
     <div class="min-h-screen flex flex-col">
-        <!-- Header -->
-        <header class="bg-rose-950 text-white px-6 py-4 flex justify-between items-center shadow-md">
-            <div>
-                <h1 class="text-xl font-bold tracking-wide">☕ KOPI SAHAJA POS</h1>
-                <p id="cashier-display" class="text-xs text-rose-200">Kasir: -</p>
+        <!-- Header Utama terinspirasi warna logo_baru.jpg.jpeg -->
+        <header class="bg-[#b30b0b] text-white px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4 shadow-xl border-b-4 border-[#fef2cc]">
+            <div class="flex items-center gap-3">
+                <div class="p-1 bg-[#a00606] border border-[#fef2cc] rounded-lg text-sm font-black text-[#fef2cc] leading-tight tracking-tighter text-center">
+                    K K<br>S.🌻
+                </div>
+                <div>
+                    <h1 class="text-xl font-black tracking-tight text-[#fef2cc]">KEDAI KOPI SAHAJA.</h1>
+                    <p id="cashier-display" class="text-xs text-amber-200 font-medium">Kasir Bertugas: -</p>
+                </div>
             </div>
-            <div class="flex items-center gap-4">
-                <nav class="flex bg-rose-950 rounded-lg p-1 text-sm font-medium border border-rose-800">
-                    <button onclick="switchTab('pos')" id="tab-pos-btn" class="bg-rose-800 text-white px-4 py-1.5 rounded-md">🛒 Kasir</button>
-                    <button onclick="switchTab('rekap'); loadShiftReport(); loadTransactionHistory();" id="tab-rekap-btn" class="text-rose-200 px-4 py-1.5 rounded-md hover:text-white">📊 Statistik & Riwayat</button>
+            <div class="flex flex-wrap items-center justify-center gap-4">
+                <nav class="flex bg-[#a00606] rounded-xl p-1 text-sm font-bold border border-red-800 shadow-inner">
+                    <button onclick="switchTab('pos')" id="tab-pos-btn" class="bg-[#fef2cc] text-[#a00606] px-4 py-1.5 rounded-lg shadow-xs transition">🛒 Kasir</button>
+                    <button onclick="switchTab('rekap'); loadShiftReport(); loadTransactionHistory();" id="tab-rekap-btn" class="text-[#fef2cc] px-4 py-1.5 rounded-lg hover:bg-black/10 transition">📊 Statistik</button>
                 </nav>
-                <button onclick="endShift()" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-sm font-medium transition">Akhiri Shift</button>
+                <button onclick="endShift()" class="bg-amber-100/10 hover:bg-red-900 border border-[#fef2cc]/30 text-[#fef2cc] px-4 py-2 rounded-xl text-xs font-bold transition tracking-wider uppercase">Akhiri Shift</button>
             </div>
         </header>
 
@@ -51,32 +64,32 @@
         <div id="tab-pos" class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 p-6">
             <div class="lg:col-span-7 space-y-6">
                 <!-- Form Input/Update Barang -->
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-                    <h3 class="text-lg font-bold mb-4 text-rose-950">➕ Input / Update Menu Barang</h3>
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-amber-100">
+                    <h3 class="text-md font-black mb-4 text-[#a00606] flex items-center gap-1.5 uppercase tracking-wide"><span>➕</span> Input / Update Menu</h3>
                     <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
-                        <input type="text" id="prod-name" placeholder="Nama Menu" class="border rounded-lg p-2 text-sm col-span-2">
-                        <input type="number" id="prod-price" placeholder="Harga (Rp)" class="border rounded-lg p-2 text-sm">
-                        <input type="number" id="prod-stock" placeholder="Stok" class="border rounded-lg p-2 text-sm">
-                        <select id="prod-category" class="border rounded-lg p-2 text-sm bg-white">
-                            <option value="UTAMA">Menu Utama</option>
-                            <option value="JAJANAN">Jajanan</option>
-                            <option value="ROKOK">Rokok</option>
+                        <input type="text" id="prod-name" placeholder="Nama Menu" class="border border-amber-200 bg-amber-50/20 rounded-xl p-2.5 text-sm col-span-2 font-medium focus:outline-none focus:border-[#b30b0b]">
+                        <input type="number" id="prod-price" placeholder="Harga (Rp)" class="border border-amber-200 bg-amber-50/20 rounded-xl p-2.5 text-sm font-medium focus:outline-none focus:border-[#b30b0b]">
+                        <input type="number" id="prod-stock" placeholder="Stok" class="border border-amber-200 bg-amber-50/20 rounded-xl p-2.5 text-sm font-medium focus:outline-none focus:border-[#b30b0b]">
+                        <select id="prod-category" class="border border-amber-200 bg-white rounded-xl p-2.5 text-sm font-bold text-amber-900 focus:outline-none focus:border-[#b30b0b]">
+                            <option value="UTAMA">Utama ☕</option>
+                            <option value="JAJANAN">Jajanan 🍿</option>
+                            <option value="ROKOK">Rokok 🚬</option>
                         </select>
-                        <button onclick="saveProduct()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg p-2 transition col-span-2 md:col-span-5">Simpan Barang</button>
+                        <button onclick="saveProduct()" class="bg-[#b30b0b] hover:bg-[#a00606] text-[#fef2cc] text-sm font-bold rounded-xl p-2.5 transition col-span-2 md:col-span-5 shadow-md">Simpan ke Katalog Menu</button>
                     </div>
                 </div>
 
                 <!-- Katalog Grid & Filter Kategori -->
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 space-y-4">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-3">
-                        <h3 class="text-lg font-bold text-rose-950">📋 Menu Kedai Kopi</h3>
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-amber-100 space-y-5">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-amber-100 pb-4">
+                        <h3 class="text-md font-black text-[#a00606] uppercase tracking-wide flex items-center gap-1.5"><span>📋</span> Katalog Menu Kedai</h3>
                         
                         <!-- FILTER CATEGORY BUTTONS -->
-                        <div class="flex flex-wrap gap-1.5 bg-gray-100 p-1 rounded-xl text-xs font-semibold">
-                            <button onclick="filterMenu('ALL')" id="filter-all" class="bg-rose-900 text-white px-3 py-1.5 rounded-lg transition">🌟 Semua</button>
-                            <button onclick="filterMenu('UTAMA')" id="filter-utama" class="text-gray-600 hover:bg-white px-3 py-1.5 rounded-lg transition">☕ Utama</button>
-                            <button onclick="filterMenu('JAJANAN')" id="filter-jajanan" class="text-gray-600 hover:bg-white px-3 py-1.5 rounded-lg transition">🍿 Jajanan</button>
-                            <button onclick="filterMenu('ROKOK')" id="filter-rokok" class="text-gray-600 hover:bg-white px-3 py-1.5 rounded-lg transition">🚬 Rokok</button>
+                        <div class="flex flex-wrap gap-1 bg-amber-50 p-1 rounded-xl text-xs font-bold border border-amber-100/60">
+                            <button onclick="filterMenu('ALL')" id="filter-all" class="bg-[#b30b0b] text-[#fef2cc] px-3 py-2 rounded-lg shadow-sm transition">🌟 Semua</button>
+                            <button onclick="filterMenu('UTAMA')" id="filter-utama" class="text-amber-900 hover:bg-white px-3 py-2 rounded-lg transition">☕ Utama</button>
+                            <button onclick="filterMenu('JAJANAN')" id="filter-jajanan" class="text-amber-900 hover:bg-white px-3 py-2 rounded-lg transition">🍿 Jajanan</button>
+                            <button onclick="filterMenu('ROKOK')" id="filter-rokok" class="text-amber-900 hover:bg-white px-3 py-2 rounded-lg transition">🚬 Rokok</button>
                         </div>
                     </div>
                     
@@ -85,57 +98,58 @@
                 </div>
             </div>
 
-            <!-- Keranjang -->
+            <!-- Keranjang Belanja -->
             <div class="lg:col-span-5 space-y-6">
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col h-full justify-between">
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-amber-100 flex flex-col h-full justify-between">
                     <div>
-                        <h3 class="text-lg font-bold mb-4 text-rose-950 border-b pb-2">🛒 Keranjang Belanja</h3>
-                        <div id="cart-items" class="space-y-3 max-h-60 overflow-y-auto mb-4">
-                            <p class="text-gray-400 text-sm text-center py-4">Belum ada item terpilih</p>
+                        <h3 class="text-md font-black mb-4 text-[#a00606] border-b border-amber-100 pb-3 flex items-center gap-1.5 uppercase tracking-wide"><span>🛒</span> Detail Keranjang</h3>
+                        <div id="cart-items" class="space-y-2.5 max-h-60 overflow-y-auto mb-4 pr-1">
+                            <p class="text-gray-400 text-xs text-center py-6 font-medium">Belum ada item yang dipilih</p>
                         </div>
                     </div>
 
-                    <div class="border-t pt-4 space-y-4">
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-600 font-medium">Total Tagihan:</span>
-                            <span id="total-price-display" class="text-2xl font-black text-rose-950">Rp 0</span>
+                    <div class="border-t border-amber-100 pt-4 space-y-4">
+                        <div class="flex justify-between items-center px-1">
+                            <span class="text-amber-900 font-bold text-sm uppercase tracking-wide">Total Tagihan:</span>
+                            <span id="total-price-display" class="text-2xl font-black text-[#a00606]">Rp 0</span>
                         </div>
 
-                        <!-- Kalkulator Kembalian -->
-                        <div class="bg-rose-50 p-4 rounded-xl border border-rose-200">
-                            <h4 class="text-xs font-bold text-rose-900 uppercase tracking-wider mb-2">🧮 Kalkulator Kembalian</h4>
+                        <!-- Kalkulator Kembalian Bertema Kuning Lembut Logo -->
+                        <div class="bg-[#fef2cc]/40 p-4 rounded-2xl border-2 border-[#fef2cc]">
+                            <h4 class="text-xs font-black text-amber-950 uppercase tracking-wider mb-2 flex items-center gap-1"><span>🧮</span> Kalkulator Kembalian</h4>
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label class="block text-xs text-gray-500 mb-1">Uang Dibayar (Rp)</label>
-                                    <input type="number" id="cash-received" oninput="calculateChange()" class="w-full bg-white border border-rose-300 rounded-lg p-2 font-bold text-lg focus:outline-none focus:ring-2 focus:ring-rose-800" placeholder="0">
+                                    <label class="block text-[10px] font-bold uppercase tracking-wider text-amber-800 mb-1">Uang Tunai (Rp)</label>
+                                    <input type="number" id="cash-received" oninput="calculateChange()" class="w-full bg-white border border-amber-200 rounded-xl p-2 font-bold text-base focus:outline-none focus:border-[#b30b0b]" placeholder="0">
                                 </div>
                                 <div>
-                                    <label class="block text-xs text-gray-500 mb-1">Kembalian (Rp)</label>
-                                    <input type="text" id="cash-change" class="w-full bg-rose-100 border border-rose-200 rounded-lg p-2 font-bold text-lg text-rose-950" value="Rp 0" readonly>
+                                    <label class="block text-[10px] font-bold uppercase tracking-wider text-amber-800 mb-1">Kembalian</label>
+                                    <input type="text" id="cash-change" class="w-full bg-amber-100/50 border border-amber-200 rounded-xl p-2 font-bold text-base text-amber-950" value="Rp 0" readonly>
                                 </div>
                             </div>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium mb-1">Metode Pembayaran</label>
-                            <select id="payment-method" onchange="togglePaymentMethod()" class="w-full border rounded-lg p-2">
-                                <option value="Tunai">Tunai</option>
-                                <option value="QRIS">QRIS (Wajib Foto Bukti)</option>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-amber-900 mb-1">Opsi Metode Pembayaran</label>
+                            <select id="payment-method" onchange="togglePaymentMethod()" class="w-full border border-amber-200 rounded-xl p-3 font-semibold bg-white text-sm">
+                                <option value="Tunai">💵 Pembayaran Tunai (Cash)</option>
+                                <option value="QRIS">📸 Scan QRIS (Wajib Foto Bukti)</option>
                             </select>
                         </div>
 
-                        <div id="qris-camera-section" class="hidden space-y-2">
-                            <label class="block text-sm font-medium text-rose-950">📸 Kamera Bukti QRIS</label>
-                            <video id="video" class="w-full h-40 object-cover rounded-lg bg-black" autoplay playsinline></video>
-                            <button id="capture-btn" onclick="capturePhoto()" class="w-full bg-blue-600 text-white text-xs py-2 rounded-lg font-medium hover:bg-blue-700">Ambil Foto</button>
+                        <!-- QRIS Section -->
+                        <div id="qris-camera-section" class="hidden space-y-2 bg-red-50/50 p-3 rounded-2xl border border-red-200">
+                            <label class="block text-xs font-bold text-[#a00606] uppercase tracking-wider">📸 Kamera Scan Bukti QRIS</label>
+                            <video id="video" class="w-full h-40 object-cover rounded-xl bg-black border-2 border-red-200" autoplay playsinline></video>
+                            <button id="capture-btn" onclick="capturePhoto()" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs py-2.5 rounded-xl font-bold transition shadow-xs">AMBIL FOTO BUKTI STRUK</button>
                             <canvas id="canvas" class="hidden"></canvas>
-                            <div id="photo-preview-container" class="hidden">
-                                <p class="text-xs text-green-600 font-medium">✓ Foto Berhasil Dikunci</p>
-                                <img id="photo-preview" class="w-full h-32 object-cover rounded-lg border mt-1">
+                            <div id="photo-preview-container" class="hidden mt-2">
+                                <p class="text-[11px] text-green-700 font-bold bg-green-50 px-2 py-1 rounded border border-green-200 inline-block">✓ Gambar berhasil dikunci</p>
+                                <img id="photo-preview" class="w-full h-32 object-cover rounded-xl border-2 border-amber-200 mt-1.5 shadow-inner">
                             </div>
                         </div>
 
-                        <button onclick="submitTransaction()" class="w-full bg-rose-900 hover:bg-rose-950 text-white font-bold py-3 rounded-xl transition shadow-md">Selesaikan Pembayaran</button>
+                        <button onclick="submitTransaction()" class="w-full bg-[#b30b0b] hover:bg-[#a00606] text-[#fef2cc] font-black py-3.5 rounded-2xl transition shadow-lg tracking-wide uppercase text-sm">Selesaikan Transaksi 🌻</button>
                     </div>
                 </div>
             </div>
@@ -144,42 +158,41 @@
         <!-- TAB 2: REKAP & STATISTIK -->
         <div id="tab-rekap" class="hidden p-6 space-y-6">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Preview WA & Riwayat Transaksi -->
                 <div class="lg:col-span-2 space-y-6">
                     <!-- Preview Laporan -->
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border space-y-4">
-                        <div class="flex justify-between items-center border-b pb-3">
-                            <h3 class="text-lg font-bold text-rose-950">📝 Preview Format Laporan WhatsApp</h3>
-                            <button onclick="sendToWhatsApp()" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-xl flex items-center gap-2 transition text-sm">
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-amber-100 space-y-4">
+                        <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 border-b border-amber-100 pb-3">
+                            <h3 class="text-md font-black text-[#a00606] uppercase tracking-wide">📝 Preview Teks Rekap Grup WA</h3>
+                            <button onclick="sendToWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 transition text-xs shadow-md uppercase">
                                 💬 Kirim Rekap ke WA
                             </button>
                         </div>
-                        <div class="bg-red-50 p-4 rounded-xl border border-red-200 flex items-center justify-between gap-4">
-                            <span class="text-sm font-medium text-red-800">Ada Pengeluaran Toko saat Shift ini?</span>
+                        <div class="bg-amber-50 p-4 rounded-2xl border border-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                            <span class="text-xs font-bold text-amber-900 uppercase tracking-wide">Ada Biaya Pengeluaran Toko?</span>
                             <div class="flex items-center gap-2">
-                                <span class="text-sm text-gray-500">Rp</span>
-                                <input type="number" id="input-pengeluaran" oninput="updateReportPreview()" value="0" class="border bg-white rounded-lg p-1.5 w-32 font-bold">
+                                <span class="text-sm font-bold text-gray-500">Rp</span>
+                                <input type="number" id="input-pengeluaran" oninput="updateReportPreview()" value="0" class="border border-amber-200 bg-white rounded-xl p-2 w-36 font-bold text-sm focus:outline-none focus:border-[#b30b0b]">
                             </div>
                         </div>
-                        <pre id="wa-text-preview" class="bg-gray-900 text-green-400 p-5 rounded-xl font-mono text-sm whitespace-pre-wrap overflow-x-auto shadow-inner"></pre>
+                        <pre id="wa-text-preview" class="bg-gray-900 text-amber-200 p-5 rounded-2xl font-mono text-xs whitespace-pre-wrap overflow-x-auto shadow-inner border-2 border-gray-800"></pre>
                     </div>
 
                     <!-- RIWAYAT TRANSAKSI TERBARU -->
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border space-y-4">
-                        <h3 class="text-lg font-bold text-rose-950 border-b pb-2">📜 Riwayat Transaksi Shift Ini</h3>
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-amber-100 space-y-4">
+                        <h3 class="text-md font-black text-[#a00606] border-b border-amber-100 pb-3 uppercase tracking-wide">📜 Log Riwayat Kasir Shift Ini</h3>
                         <div class="overflow-x-auto">
-                            <table class="w-full text-left border-collapse text-sm">
+                            <table class="w-full text-left border-collapse text-xs">
                                 <thead>
-                                    <tr class="bg-rose-50 text-rose-950">
-                                        <th class="p-3 font-semibold rounded-l-lg">Jam</th>
-                                        <th class="p-3 font-semibold">Item yang Dibeli</th>
-                                        <th class="p-3 font-semibold">Metode</th>
-                                        <th class="p-3 font-semibold rounded-r-lg text-right">Total</th>
+                                    <tr class="bg-amber-50 text-amber-950 font-bold border-b border-amber-100">
+                                        <th class="p-3 rounded-l-xl">Jam</th>
+                                        <th class="p-3">Rincian Belanja Menu</th>
+                                        <th class="p-3">Metode</th>
+                                        <th class="p-3 rounded-r-xl text-right">Total Nominal</th>
                                     </tr>
                                 </thead>
-                                <tbody id="transaction-history-rows" class="divide-y divide-gray-100">
+                                <tbody id="transaction-history-rows" class="divide-y divide-amber-50">
                                     <tr>
-                                        <td colspan="4" class="text-center p-4 text-gray-400">Belum ada transaksi terekam</td>
+                                        <td colspan="4" class="text-center p-6 text-gray-400 font-medium">Belum ada data rekaman masuk</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -189,19 +202,19 @@
 
                 <!-- Live Statistik Keuangan -->
                 <div class="space-y-6">
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                        <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">📊 Live Statistik Keuangan</h3>
-                        <div class="space-y-4">
-                            <div class="flex justify-between items-center p-3 bg-rose-50 rounded-xl">
-                                <span class="text-sm font-medium text-rose-950">Total Pendapatan</span>
-                                <span id="stat-pendapatan" class="font-black text-rose-950 text-lg">Rp 0</span>
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-amber-100">
+                        <h3 class="text-xs font-black text-amber-800 uppercase tracking-wider mb-4">📊 Live Ringkasan Finansial</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center p-4 bg-red-50 rounded-2xl border border-red-100">
+                                <span class="text-xs font-bold text-[#a00606] uppercase tracking-wide">Total Omset</span>
+                                <span id="stat-pendapatan" class="font-black text-[#a00606] text-lg">Rp 0</span>
                             </div>
-                            <div class="flex justify-between items-center p-3 bg-blue-50 rounded-xl">
-                                <span class="text-sm font-medium text-blue-900">Uang Masuk QRIS</span>
+                            <div class="flex justify-between items-center p-3.5 bg-blue-50/50 rounded-2xl border border-blue-100">
+                                <span class="text-xs font-bold text-blue-900 uppercase tracking-wide">Kas Masuk QRIS</span>
                                 <span id="stat-qris" class="font-bold text-blue-900">Rp 0</span>
                             </div>
-                            <div class="flex justify-between items-center p-3 bg-emerald-50 rounded-xl">
-                                <span class="text-sm font-medium text-emerald-900">Uang Masuk Cash</span>
+                            <div class="flex justify-between items-center p-3.5 bg-emerald-50/50 rounded-2xl border border-emerald-100">
+                                <span class="text-xs font-bold text-emerald-900 uppercase tracking-wide">Kas Masuk Tunai</span>
                                 <span id="stat-cash" class="font-bold text-emerald-900">Rp 0</span>
                             </div>
                         </div>
@@ -213,9 +226,9 @@
 
     <!-- CODE SCRIPT UTAMA -->
     <script>
-        // === ⚠️ ISI KREDENSIAL SUPABASE KAMU DI SINI ⚠️ ===
-        const SUPABASE_URL = "https://obrbnenfojqdepqzxain.supabase.co"; 
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9icmJuZW5mb2pxZGVwcXp4YWluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2NDU2MDAsImV4cCI6MjA5MjIyMTYwMH0.Ef0uELb-CwYxlKpK_DggIrfX0NZDHiyEHTIcZmseyzk";
+        // === ⚠️ KREDENSIAL SUPABASE ⚠️ ===
+        const SUPABASE_URL = "MASUKKAN_PROJECT_URL_KAMU"; 
+        const SUPABASE_ANON_KEY = "MASUKKAN_ANON_KEY_KAMU";
 
         let supabaseClient = null;
         let currentShiftId = localStorage.getItem('currentShiftId') || null;
@@ -225,7 +238,6 @@
         let blobPhotoQRIS = null;
         let streamObj = null;
         
-        // Memori Penyimpan Lokal untuk Filter Kategori
         let allProductsRaw = []; 
         let activeCategory = "ALL";
 
@@ -251,19 +263,19 @@
             if (tabName === 'pos') {
                 document.getElementById('tab-pos').classList.remove('hidden');
                 document.getElementById('tab-rekap').classList.add('hidden');
-                document.getElementById('tab-pos-btn').className = "bg-rose-800 text-white px-4 py-1.5 rounded-md";
-                document.getElementById('tab-rekap-btn').className = "text-rose-200 px-4 py-1.5 rounded-md hover:text-white";
+                document.getElementById('tab-pos-btn').className = "bg-[#fef2cc] text-[#a00606] px-4 py-1.5 rounded-lg shadow-xs transition";
+                document.getElementById('tab-rekap-btn').className = "text-[#fef2cc] px-4 py-1.5 rounded-lg hover:bg-black/10 transition";
             } else {
                 document.getElementById('tab-pos').classList.add('hidden');
                 document.getElementById('tab-rekap').classList.remove('hidden');
-                document.getElementById('tab-pos-btn').className = "text-rose-200 px-4 py-1.5 rounded-md hover:text-white";
-                document.getElementById('tab-rekap-btn').className = "bg-rose-800 text-white px-4 py-1.5 rounded-md";
+                document.getElementById('tab-pos-btn').className = "text-[#fef2cc] px-4 py-1.5 rounded-lg hover:bg-black/10 transition";
+                document.getElementById('tab-rekap-btn').className = "bg-[#fef2cc] text-[#a00606] px-4 py-1.5 rounded-lg shadow-xs transition";
             }
         }
 
         async function startShift() {
             const username = document.getElementById('shift-username').value.trim();
-            const initialCash = parseInt(document.getElementById('shift-cash').value) || 0;
+            const initialCash = 0; 
             if(!username) return alert("Nama Kasir/Shift wajib diisi!");
 
             try {
@@ -291,57 +303,46 @@
             try {
                 const { data, error } = await supabaseClient.from('products').select('*').order('name', { ascending: true });
                 if (error) return alert("Gagal Ambil Menu: " + error.message);
-
-                // Simpan data asli ke variabel global
                 allProductsRaw = data; 
                 renderProductGrid();
             } catch (e) { console.error(e); }
         }
 
-        // FUNGSI RENDER GRID DENGAN MECHANIC FILTER KATEGORI
         function renderProductGrid() {
             const grid = document.getElementById('product-grid');
             grid.innerHTML = '';
 
-            // Lakukan filter array data berdasarkan kategori terpilih
             const filtered = activeCategory === "ALL" 
                 ? allProductsRaw 
                 : allProductsRaw.filter(p => p.category === activeCategory);
 
             if(filtered.length === 0) {
-                grid.innerHTML = `<div class="col-span-3 text-center py-8 text-gray-400 text-sm">Tidak ada menu di kategori ini</div>`;
+                grid.innerHTML = `<div class="col-span-2 sm:col-span-3 text-center py-8 text-gray-400 text-xs font-medium">Tidak ada item di kategori ini</div>`;
                 return;
             }
 
             filtered.forEach(prod => {
                 grid.innerHTML += `
-                    <div class="border p-3 rounded-xl bg-gray-50 flex flex-col justify-between hover:shadow-sm transition border-gray-100">
+                    <div class="border border-amber-100 p-3 rounded-2xl bg-amber-50/10 flex flex-col justify-between hover:shadow-md transition">
                         <div>
-                            <span class="bg-rose-100 text-rose-950 font-bold px-1.5 py-0.5 rounded text-[10px] uppercase">${prod.category}</span>
-                            <h4 class="font-bold text-gray-900 mt-1">${prod.name}</h4>
-                            <p class="text-xs text-rose-900 font-semibold">Rp ${prod.price.toLocaleString('id-ID')}</p>
-                            <p class="text-[11px] text-gray-400">Stok: ${prod.stock}</p>
+                            <span class="bg-[#fef2cc] text-[#a00606] font-bold px-2 py-0.5 rounded-lg text-[9px] uppercase tracking-wider">${prod.category}</span>
+                            <h4 class="font-bold text-amber-950 mt-1.5 text-sm">${prod.name}</h4>
+                            <p class="text-xs text-[#b30b0b] font-black mt-0.5">Rp ${prod.price.toLocaleString('id-ID')}</p>
+                            <p class="text-[10px] text-gray-400 font-medium mt-0.5">Stok: ${prod.stock}</p>
                         </div>
-                        <button onclick="addToCart('${prod.id}', '${prod.name}', ${prod.price}, ${prod.stock})" class="mt-2 bg-rose-900 text-white hover:bg-rose-950 text-xs font-bold py-1.5 rounded-lg transition">+ Tambah</button>
+                        <button onclick="addToCart('${prod.id}', '${prod.name}', ${prod.price}, ${prod.stock})" class="mt-3 bg-[#b30b0b] text-[#fef2cc] hover:bg-[#a00606] text-xs font-bold py-2 rounded-xl transition shadow-xs">+ Beli</button>
                     </div>
                 `;
             });
         }
 
-        // ENGINE KLIK FILTER KATEGORI
         function filterMenu(categoryName) {
             activeCategory = categoryName;
-            
-            // Reset seluruh gaya tombol filter
             const btns = ['all', 'utama', 'jajanan', 'rokok'];
             btns.forEach(b => {
-                document.getElementById(`filter-${b}`).className = "text-gray-600 hover:bg-white px-3 py-1.5 rounded-lg transition";
+                document.getElementById(`filter-${b}`).className = "text-amber-900 hover:bg-white px-3 py-2 rounded-lg transition";
             });
-
-            // Aktifkan gaya tombol yang sedang diklik
-            document.getElementById(`filter-${categoryName.toLowerCase()}`).className = "bg-rose-900 text-white px-3 py-1.5 rounded-lg transition shadow-xs";
-            
-            // Render ulang barang yang lolos filter
+            document.getElementById(`filter-${categoryName.toLowerCase()}`).className = "bg-[#b30b0b] text-[#fef2cc] px-3 py-2 rounded-lg shadow-sm transition";
             renderProductGrid();
         }
 
@@ -379,12 +380,12 @@
                 const item = cart[id];
                 totalPrice += (item.price * item.qty);
                 container.innerHTML += `
-                    <div class="flex justify-between items-center bg-gray-50 p-2 rounded-lg border text-sm">
-                        <div><p class="font-semibold">${item.name}</p><p class="text-xs text-gray-500">${item.qty} x Rp ${item.price.toLocaleString()}</p></div>
-                        <div class="flex items-center gap-3"><span class="font-bold text-rose-950">Rp ${(item.price * item.qty).toLocaleString()}</span><button onclick="removeFromCart('${id}')" class="text-red-500 font-bold">✕</button></div>
+                    <div class="flex justify-between items-center bg-amber-50/30 p-2.5 rounded-xl border border-amber-100/60 text-xs font-medium">
+                        <div><p class="font-bold text-gray-900">${item.name}</p><p class="text-[11px] text-gray-500">${item.qty} x Rp ${item.price.toLocaleString()}</p></div>
+                        <div class="flex items-center gap-2.5"><span class="font-black text-amber-950">Rp ${(item.price * item.qty).toLocaleString()}</span><button onclick="removeFromCart('${id}')" class="text-red-500 hover:text-red-700 font-bold p-1">✕</button></div>
                     </div>`;
             });
-            if(Object.keys(cart).length === 0) container.innerHTML = `<p class="text-gray-400 text-sm text-center py-4">Belum ada item terpilih</p>`;
+            if(Object.keys(cart).length === 0) container.innerHTML = `<p class="text-gray-400 text-xs text-center py-6 font-medium">Belum ada item yang dipilih</p>`;
             document.getElementById('total-price-display').innerText = `Rp ${totalPrice.toLocaleString()}`;
             calculateChange();
         }
@@ -433,7 +434,8 @@
                 if (method === "QRIS") {
                     if(!blobPhotoQRIS) return alert("Wajib foto bukti QRIS terlebih dahulu!");
                     
-                    const fName = `qris_${Date.now()}.png`;
+                    const timestamp = Date.now();
+                    const fName = `qris_${timestamp}.png`;
                     
                     const { data: upData, error: upErr } = await supabaseClient.storage
                         .from('qris-evidence')
@@ -441,12 +443,19 @@
                     
                     if(upErr) {
                         console.error(upErr);
-                        return alert("❌ Gagal simpan bukti QRIS! Cek apakah bucket 'qris-evidence' sudah dibuat & diset Public. Error: " + upErr.message);
+                        return alert("❌ Gagal simpan bukti QRIS! Error: " + upErr.message);
                     }
                     
                     if(upData) {
                         qrisUrl = supabaseClient.storage.from('qris-evidence').getPublicUrl(fName).data.publicUrl;
                     }
+
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = URL.createObjectURL(blobPhotoQRIS);
+                    downloadLink.download = `bukti_qris_${timestamp}.png`;
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+                    document.body.removeChild(downloadLink);
                 }
 
                 let itemsArray = [];
@@ -466,7 +475,11 @@
 
                 if(txErr) return alert("Gagal Simpan Transaksi: " + txErr.message);
 
-                alert("🎉 Transaksi Berhasil & Bukti QRIS Terkunci!");
+                alert(method === "QRIS" 
+                    ? "🎉 Transaksi Sukses! Bukti QRIS tersimpan ke DB & otomatis terunduh ke GALERI HP!" 
+                    : "🎉 Transaksi Berhasil!"
+                );
+                
                 cart = {}; blobPhotoQRIS = null;
                 document.getElementById('cash-received').value = '';
                 document.getElementById('photo-preview-container').classList.add('hidden');
@@ -549,15 +562,15 @@
                     const textBelanjaan = detailBarang.join(', ') || '-';
 
                     const badgeMetode = tx.payment_method === 'QRIS' 
-                        ? `<span class="bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded text-xs">QRIS</span>`
-                        : `<span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-xs">Tunai</span>`;
+                        ? `<span class="bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded text-[10px]">QRIS</span>`
+                        : `<span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[10px]">Tunai</span>`;
 
                     tbody.innerHTML += `
-                        <tr class="hover:bg-gray-50 transition">
+                        <tr class="hover:bg-amber-50/50 transition">
                             <td class="p-3 font-mono text-gray-500">${jamTx}</td>
                             <td class="p-3 font-medium text-gray-800 max-w-xs truncate" title="${textBelanjaan}">${textBelanjaan}</td>
                             <td class="p-3">${badgeMetode}</td>
-                            <td class="p-3 text-right font-bold text-rose-950">Rp ${tx.total_price.toLocaleString('id-ID')}</td>
+                            <td class="p-3 text-right font-bold text-amber-950">Rp ${tx.total_price.toLocaleString('id-ID')}</td>
                         </tr>
                     `;
                 });

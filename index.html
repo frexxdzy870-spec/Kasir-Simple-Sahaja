@@ -144,7 +144,7 @@
                 <div class="lg:col-span-2 space-y-6">
                     <div class="bg-white p-6 rounded-3xl shadow-md border border-amber-100 space-y-4">
                         <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 border-b border-amber-100 pb-3">
-                            <h3 class="text-md font-black text-[#a00606] uppercase tracking-wide">📝 Rekap Laporan </h3>
+                            <h3 class="text-md font-black text-[#a00606] uppercase tracking-wide"> Rekap Laporan </h3>
                             <button onclick="sendToWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 transition text-xs shadow-md uppercase">
                                  Kirim Rekap ke WA
                             </button>
@@ -160,7 +160,7 @@
                     </div>
 
                     <div class="bg-white p-6 rounded-3xl shadow-md border border-amber-100 space-y-4">
-                        <h3 class="text-md font-black text-[#a00606] border-b border-amber-100 pb-3 uppercase tracking-wide">📜 Log Riwayat Kasir </h3>
+                        <h3 class="text-md font-black text-[#a00606] border-b border-amber-100 pb-3 uppercase tracking-wide"> Log Riwayat Kasir </h3>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left border-collapse text-xs">
                                 <thead>
@@ -183,7 +183,7 @@
 
                 <div class="space-y-6">
                     <div class="bg-white p-6 rounded-3xl shadow-md border border-amber-100">
-                        <h3 class="text-xs font-black text-amber-800 uppercase tracking-wider mb-4">📊 Ringkasan Finansial</h3>
+                        <h3 class="text-xs font-black text-amber-800 uppercase tracking-wider mb-4"> Ringkasan Finansial</h3>
                         <div class="space-y-3">
                             <div class="flex justify-between items-center p-4 bg-red-50 rounded-2xl border border-red-100">
                                 <span class="text-xs font-bold text-[#a00606] uppercase tracking-wide">Total Omset</span>
@@ -208,7 +208,7 @@
         <div class="bg-white rounded-3xl p-6 max-w-sm w-full text-center border-4 border-[#fef2cc] shadow-2xl transform scale-95 transition-all duration-300 relative overflow-hidden">
             <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4 animate__animated animate__heartBeat animate__infinite">✓</div>
             <h3 class="text-xl font-black text-amber-950 mb-1">TRANSAKSI BERHASIL!</h3>
-            <p class="text-xs text-gray-500 font-medium mb-4">Data pesanan berhasil 🌻</p>
+            <p class="text-xs text-gray-500 font-medium mb-4">Data pesanan berhasil</p>
             <div class="bg-amber-50 p-3 rounded-2xl border border-amber-100 mb-5 text-left text-xs font-mono space-y-1 text-gray-700">
                 <div class="flex justify-between"><span>Metode:</span><span id="pop-method" class="font-bold text-amber-900">Tunai</span></div>
                 <div class="flex justify-between text-sm pt-1 border-t border-dashed border-amber-200"><span class="font-bold">Total:</span><span id="pop-total" class="font-black text-[#a00606]">Rp 0</span></div>
@@ -479,7 +479,7 @@
                         .upload(fName, blobPhotoQRIS, { contentType: 'image/png', upsert: true });
                     
                     if(upErr) {
-                        return alert("❌ Gagal simpan bukti QRIS! Cek apakah bucket 'qris-evidence' sudah dibuat & diset Public/diizinkan RLS-nya. Error: " + upErr.message);
+                        return alert(" Gagal simpan bukti QRIS! Cek apakah bucket 'qris-evidence' sudah dibuat & diset Public/diizinkan RLS-nya. Error: " + upErr.message);
                     }
                     if(upData) qrisUrl = supabaseClient.storage.from('qris-evidence').getPublicUrl(fName).data.publicUrl;
                 }
@@ -628,5 +628,23 @@
             } catch (e) { alert(e.message); }
         }
     </script>
+
+     <footer class="mt-auto bg-gray-100 py-6 border-t border-gray-200 flex flex-col items-center justify-center gap-3">
+            <span class="text-[10px] text-gray-400 font-bold tracking-wider uppercase">Sponsored Advertisement</span>
+            
+            <div class="bg-white p-2 rounded-xl shadow-xs border border-gray-300/60 overflow-hidden min-h-[90px] min-w-[320px] flex items-center justify-center">
+                <!-- 🔳 SCRIPT BANNER IKLAN ADSTERRA (320x50) -->
+                <script type="text/javascript">
+                    atOptions = {
+                        'key' : 'e00a7381a6332fd025ea38cf37fd2ee9',
+                        'format' : 'iframe',
+                        'height' : 50,
+                        'width' : 320,
+                        'params' : {}
+                    };
+                </script>
+                <script type="text/javascript" src="https://fireplaceresolve.com/e00a7381a6332fd025ea38cf37fd2ee9/invoke.js"></script>
+            </div>
+        </footer>
 </body>
 </html>

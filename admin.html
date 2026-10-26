@@ -28,7 +28,9 @@
   <div id="report-list" class="space-y-3"></div>
  </section>
  <section id="s-absen" class="sec hidden bg-white p-6 rounded-3xl shadow-md border border-amber-100 space-y-3">
-  <h3 class="font-black text-[#a00606] uppercase">Absensi & Gaji (Bulan Ini)</h3>
+  <div class="flex flex-wrap items-center justify-between gap-2"><h3 class="font-black text-[#a00606] uppercase">Absensi & Gaji</h3>
+   <div class="flex gap-2 items-center text-xs"><input type="month" id="ab-month" onchange="absensi();kelola()" class="border border-amber-200 rounded-xl p-2 font-bold">
+   <button onclick="exportAbsensi()" class="bg-emerald-600 text-white font-bold px-4 py-2 rounded-xl uppercase">Rekap Absensi & Gaji ke Excel</button></div></div>
   <div class="flex flex-wrap gap-2 bg-amber-50 p-3 rounded-2xl border border-amber-200 text-xs">
    <select id="ab-emp" class="border border-amber-200 rounded-xl p-2 bg-white font-bold"></select>
    <select id="ab-shift" class="border border-amber-200 rounded-xl p-2 bg-white font-bold"><option value="pagi">Pagi</option><option value="malam">Malam</option></select>
@@ -45,7 +47,24 @@
    <input id="st-qty" type="number" class="border border-amber-200 rounded-xl p-2 bg-white font-bold w-28" placeholder="Jumlah masuk">
    <button onclick="addStock()" class="bg-[#b30b0b] text-[#fef2cc] font-bold px-4 rounded-xl">+ Barang Masuk</button>
   </div>
-  <table class="w-full text-xs text-left"><thead><tr class="bg-amber-50 font-bold"><th class="p-3">Barang</th><th class="p-3 text-right">Stok</th></tr></thead><tbody id="stock-rows" class="divide-y divide-amber-50"></tbody></table>
+  <table class="w-full text-xs text-left"><thead><tr class="bg-amber-50 font-bold"><th class="p-3">Barang</th><th class="p-3 text-right">Stok</th><th></th></tr></thead><tbody id="stock-rows" class="divide-y divide-amber-50"></tbody></table>
+ </section>
+ <section id="s-kelola" class="sec hidden bg-white p-6 rounded-3xl shadow-md border border-amber-100 space-y-4">
+  <h3 class="font-black text-[#a00606] uppercase">Kelola Data (Edit & Reset)</h3>
+  <p class="text-[11px] text-gray-500">Gunakan untuk membetulkan kekeliruan input. Perubahan langsung tersimpan.</p>
+  <div class="flex flex-wrap gap-2 bg-amber-50 p-3 rounded-2xl border border-amber-200 text-xs">
+   <input id="em-name" class="border border-amber-200 rounded-xl p-2 bg-white font-bold" placeholder="Nama karyawan baru">
+   <input id="em-pin" class="border border-amber-200 rounded-xl p-2 bg-white font-bold w-28" placeholder="PIN">
+   <button onclick="addEmp()" class="bg-[#b30b0b] text-[#fef2cc] font-bold px-4 rounded-xl">+ Karyawan</button></div>
+  <h4 class="text-xs font-black text-amber-900 uppercase">Karyawan</h4><div id="k-emp" class="space-y-1"></div>
+  <h4 class="text-xs font-black text-amber-900 uppercase">Absensi (bulan terpilih di tab Absensi)</h4><div id="k-att" class="space-y-1 max-h-64 overflow-y-auto"></div>
+  <h4 class="text-xs font-black text-amber-900 uppercase">Transaksi Hari Ini</h4><div id="k-tx" class="space-y-1 max-h-64 overflow-y-auto"></div>
+  <h4 class="text-xs font-black text-amber-900 uppercase">Pengeluaran (14 hari)</h4><div id="k-exp" class="space-y-1 max-h-64 overflow-y-auto"></div>
+  <h4 class="text-xs font-black text-red-700 uppercase pt-2">Reset</h4>
+  <div class="flex flex-wrap gap-2 text-xs">
+   <button onclick="resetData('absen')" class="bg-red-50 text-red-700 border border-red-200 font-bold px-3 py-2 rounded-xl">Reset absensi bulan ini</button>
+   <button onclick="resetData('stok')" class="bg-red-50 text-red-700 border border-red-200 font-bold px-3 py-2 rounded-xl">Reset semua stok ke 0</button>
+   <button onclick="resetData('laporan')" class="bg-red-50 text-red-700 border border-red-200 font-bold px-3 py-2 rounded-xl">Hapus laporan masuk hari ini</button></div>
  </section>
  <section id="s-grafik" class="sec hidden space-y-6">
   <div class="flex flex-wrap gap-2">
@@ -60,7 +79,7 @@
 </main>
 <script>
 const SUPABASE_URL = "https://obrbnenfojqdepqzxain.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9icmJuZW5mb2pxZGVwcXp4YWluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2NDU2MDAsImV4cCI6MjA5MjIyMTYwMH0.Ef0uELb-CwYxlKpK_DggIrfX0NZDHiyEHTIcZmseyzk";
+const SUPABASE_ANON_KEY = "ISI_DENGAN_ANON_KEY_YANG_SAMA_SEPERTI_DI_index.html";
 const GAJI_PER_SHIFT = 35000;
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const $ = id => document.getElementById(id);
@@ -71,7 +90,7 @@ const monthStart = today.slice(0, 8) + '01';
 const dayStart = today + 'T00:00:00+07:00';
 let charts = {};
 
-const tabs = [['monitor','👀 Monitoring'],['absen','🗓️ Absensi & Gaji'],['stok','📦 Stok'],['grafik','📊 Grafik & Excel']];
+const tabs = [['monitor','👀 Monitoring'],['absen','🗓️ Absensi & Gaji'],['stok','📦 Stok'],['kelola','🛠️ Kelola'],['grafik','📊 Grafik & Excel']];
 $('nav').innerHTML = tabs.map(([k, l]) => `<button onclick="tab('${k}')" id="t-${k}" class="px-4 py-1.5 rounded-lg text-[#fef2cc] transition">${l}</button>`).join('');
 function tab(k) {
   document.querySelectorAll('.sec').forEach(s => s.classList.add('hidden'));
@@ -92,7 +111,7 @@ function start() {
   sb.channel('rt').on('postgres_changes', { event: '*', schema: 'public' }, () => loadAll()).subscribe();
   setInterval(loadAll, 20000);
 }
-async function loadAll() { await Promise.all([monitor(), absensi(), stok(), grafik()]); }
+async function loadAll() { await Promise.all([monitor(), absensi(), stok(), grafik(), kelola()]); }
 
 async function monitor() {
   const [{ data: emps }, { data: open }, { data: att }, { data: reps }] = await Promise.all([
@@ -118,7 +137,7 @@ async function setAbsen() {
 async function absensi() {
   const [{ data: emps }, { data: att }] = await Promise.all([
     sb.from('employees').select('id,name').eq('role', 'karyawan'),
-    sb.from('attendance').select('employee_id,status').gte('work_date', monthStart)]);
+    sb.from('attendance').select('employee_id,status').gte('work_date', monthRange()[0]).lt('work_date', monthRange()[1])]);
   $('absen-rows').innerHTML = (emps || []).map(e => {
     const c = s => (att || []).filter(a => a.employee_id === e.id && a.status === s).length;
     return `<tr><td class="p-3 font-bold">${e.name}</td><td class="p-3">${c('hadir')}</td><td class="p-3">${c('izin')}</td><td class="p-3">${c('sakit')}</td><td class="p-3 text-right font-black">${rp(c('hadir') * GAJI_PER_SHIFT)}</td></tr>`;
@@ -127,7 +146,7 @@ async function absensi() {
 
 async function stok() {
   const { data } = await sb.from('stock').select('*').order('product_name');
-  $('stock-rows').innerHTML = (data || []).map(s => `<tr><td class="p-3 font-bold">${s.product_name}</td><td class="p-3 text-right font-black ${s.qty <= 5 ? 'text-red-600' : ''}">${s.qty}</td></tr>`).join('');
+  $('stock-rows').innerHTML = (window._stk = data || []).map((s, i) => `<tr><td class="p-3 font-bold">${s.product_name}</td><td class="p-3 text-right font-black ${s.qty <= 5 ? 'text-red-600' : ''}">${s.qty}</td><td class="p-3 text-right text-xs font-bold whitespace-nowrap"><button onclick="editStock(${i})" class="text-blue-700">Ubah</button> <button onclick="delStock(${i})" class="text-[#b30b0b] ml-2">Hapus</button></td></tr>`).join('');
   $('st-list').innerHTML = (data || []).map(s => `<option value="${s.product_name}">`).join('');
 }
 async function addStock() {
@@ -204,6 +223,96 @@ async function exportExcel() {
   ws.columns.forEach((c, i) => c.width = [14, 20, 20, 20, 9, 22, 20, 20, 20, 16, 16][i]);
   const buf = await wb.xlsx.writeBuffer(), l = document.createElement('a');
   l.href = URL.createObjectURL(new Blob([buf])); l.download = `Laporan Keuangan Kedai ${from} - ${to}.xlsx`; l.click();
+}
+
+// ===== Edit & Reset =====
+function monthRange() {
+  const m = ($('ab-month') && $('ab-month').value) || today.slice(0, 7), [y, mo] = m.split('-').map(Number);
+  const nx = mo === 12 ? `${y + 1}-01` : `${y}-${String(mo + 1).padStart(2, '0')}`;
+  return [m + '-01', nx + '-01'];
+}
+$('ab-month').value = today.slice(0, 7);
+let D = { emp: [], att: [], tx: [], exp: [] };
+const krow = (l, r) => `<div class="flex justify-between items-center gap-2 bg-amber-50/50 border border-amber-100 rounded-xl px-3 py-2 text-xs"><span>${l}</span><span class="flex gap-3 shrink-0 font-bold">${r}</span></div>`;
+const kb = (fn, t, c = 'text-blue-700') => `<button onclick="${fn}" class="${c}">${t}</button>`;
+const done = r => { if (r && r.error) alert(r.error.message); else loadAll(); };
+async function kelola() {
+  const [f, t] = monthRange();
+  const [{ data: emp }, { data: att }, { data: tx }, { data: ex }] = await Promise.all([
+    sb.from('employees').select('*').order('name'),
+    sb.from('attendance').select('*').gte('work_date', f).lt('work_date', t).order('work_date', { ascending: false }),
+    sb.from('transactions').select('id,total_price,payment_method,items_ordered,created_at').gte('created_at', dayStart).order('created_at', { ascending: false }),
+    sb.from('expenses').select('*').gte('created_at', new Date(Date.now() - 13 * 864e5).toISOString()).order('created_at', { ascending: false })]);
+  D = { emp: emp || [], att: att || [], tx: tx || [], exp: ex || [] };
+  const nm = id => (D.emp.find(e => e.id === id) || {}).name || '?';
+  $('k-emp').innerHTML = D.emp.map(e => krow(`<b>${e.name}</b> (${e.role}) ${e.active === false ? '<span class="text-red-600">nonaktif</span>' : ''}`,
+    kb(`editEmp('${e.id}')`, 'Ubah nama') + kb(`resetPin('${e.id}')`, 'Reset PIN') + kb(`toggleEmp('${e.id}')`, e.active === false ? 'Aktifkan' : 'Nonaktifkan', 'text-amber-700'))).join('');
+  $('k-att').innerHTML = D.att.map(a => krow(`${a.work_date.split('-').reverse().join('/')} · <b>${nm(a.employee_id)}</b> · ${a.shift_type} · ${a.status}`,
+    kb(`editAtt('${a.id}')`, 'Ubah') + kb(`delRow('attendance','${a.id}')`, 'Hapus', 'text-[#b30b0b]'))).join('') || '<p class="text-xs text-gray-400">Kosong</p>';
+  $('k-tx').innerHTML = D.tx.map(x => krow(`${new Date(x.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} · ${(x.items_ordered || []).map(i => i.name + ' ' + i.qty + 'x').join(', ')} · <b>${rp(x.total_price)}</b> (${x.payment_method})`,
+    kb(`voidTx('${x.id}')`, 'Batalkan', 'text-[#b30b0b]'))).join('') || '<p class="text-xs text-gray-400">Kosong</p>';
+  $('k-exp').innerHTML = D.exp.map(x => krow(`${wib(x.created_at).split('-').reverse().join('/')} · <b>${x.item_name}</b> x${x.qty} · ${rp(x.price)} (${x.pay})`,
+    kb(`editExp('${x.id}')`, 'Ubah') + kb(`delRow('expenses','${x.id}')`, 'Hapus', 'text-[#b30b0b]'))).join('') || '<p class="text-xs text-gray-400">Kosong</p>';
+}
+async function addEmp() {
+  const name = $('em-name').value.trim(), pin = $('em-pin').value.trim();
+  if (!name || !pin) return alert('Isi nama dan PIN');
+  done(await sb.from('employees').insert({ name, pin, role: 'karyawan', active: true })); $('em-name').value = $('em-pin').value = '';
+}
+async function editEmp(id) { const e = D.emp.find(x => x.id === id), v = prompt('Nama baru:', e.name); if (v && v.trim()) done(await sb.from('employees').update({ name: v.trim() }).eq('id', id)); }
+async function resetPin(id) { const v = prompt('PIN baru:'); if (v && v.trim()) done(await sb.from('employees').update({ pin: v.trim() }).eq('id', id)); }
+async function toggleEmp(id) { const e = D.emp.find(x => x.id === id); done(await sb.from('employees').update({ active: e.active === false }).eq('id', id)); }
+async function editAtt(id) {
+  const a = D.att.find(x => x.id === id), v = (prompt('Status baru (hadir / izin / sakit):', a.status) || '').toLowerCase().trim();
+  if (!v) return; if (!['hadir', 'izin', 'sakit'].includes(v)) return alert('Harus hadir, izin, atau sakit');
+  done(await sb.from('attendance').update({ status: v }).eq('id', id));
+}
+async function editExp(id) {
+  const x = D.exp.find(e => e.id === id), n = prompt('Nama barang:', x.item_name); if (n === null) return;
+  const p = parseInt(prompt('Harga (total):', x.price)); if (!p) return alert('Harga tidak valid');
+  done(await sb.from('expenses').update({ item_name: n.trim() || x.item_name, price: p }).eq('id', id));
+}
+async function delRow(tbl, id) { if (confirm('Hapus data ini?')) done(await sb.from(tbl).delete().eq('id', id)); }
+async function voidTx(id) {
+  const x = D.tx.find(t => t.id === id); if (!confirm('Batalkan transaksi ini? Stok akan dikembalikan.')) return;
+  for (const i of x.items_ordered || []) await sb.rpc('decrement_stock', { p_name: i.name, p_qty: -i.qty });
+  done(await sb.from('transactions').delete().eq('id', id));
+}
+async function editStock(i) { const s = window._stk[i], v = prompt(`Stok ${s.product_name} (koreksi jadi):`, s.qty); if (v !== null && v.trim() !== '' && !isNaN(v)) done(await sb.from('stock').update({ qty: parseInt(v) }).eq('product_name', s.product_name)); }
+async function delStock(i) { const s = window._stk[i]; if (confirm('Hapus ' + s.product_name + ' dari daftar stok?')) done(await sb.from('stock').delete().eq('product_name', s.product_name)); }
+async function resetData(k) {
+  if ((prompt('Ketik RESET untuk melanjutkan:') || '') !== 'RESET') return;
+  if (k === 'absen') done(await sb.from('attendance').delete().gte('work_date', monthRange()[0]).lt('work_date', monthRange()[1]));
+  if (k === 'stok') done(await sb.from('stock').update({ qty: 0 }).neq('product_name', ''));
+  if (k === 'laporan') done(await sb.from('reports').delete().gte('created_at', dayStart));
+}
+
+// ===== Excel rekap absensi & gaji =====
+async function exportAbsensi() {
+  const [f, t] = monthRange();
+  const [{ data: emps }, { data: att }] = await Promise.all([
+    sb.from('employees').select('id,name').eq('role', 'karyawan').order('name'),
+    sb.from('attendance').select('*').gte('work_date', f).lt('work_date', t).order('work_date')]);
+  const wb = new ExcelJS.Workbook(), ws = wb.addWorksheet('Rekap Gaji'), fill = c => ({ type: 'pattern', pattern: 'solid', fgColor: { argb: c } });
+  const thin = { style: 'thin' }, bd = { top: thin, left: thin, bottom: thin, right: thin }, fmt = '"Rp" #,##0';
+  ws.addRow(['REKAP ABSENSI & GAJI ' + $('ab-month').value]).font = { bold: true, size: 14 };
+  ws.addRow(['Gaji per shift', GAJI_PER_SHIFT]).getCell(2).numFmt = fmt;
+  ws.addRow(['Karyawan', 'Hadir', 'Izin', 'Sakit', 'Gaji']).eachCell(c => { c.fill = fill('FFF4B183'); c.font = { bold: true }; c.alignment = { horizontal: 'center' }; c.border = bd; });
+  let r = 4;
+  (emps || []).forEach(e => {
+    const c = s => (att || []).filter(a => a.employee_id === e.id && a.status === s).length;
+    const row = ws.addRow([e.name, c('hadir'), c('izin'), c('sakit'), { formula: `B${r}*$B$2`, result: c('hadir') * GAJI_PER_SHIFT }]);
+    row.eachCell(x => x.border = bd); row.getCell(5).numFmt = fmt; r++;
+  });
+  const tot = ws.addRow(['TOTAL', { formula: `SUM(B4:B${r - 1})` }, { formula: `SUM(C4:C${r - 1})` }, { formula: `SUM(D4:D${r - 1})` }, { formula: `SUM(E4:E${r - 1})` }]);
+  tot.eachCell(x => { x.fill = fill('FFFFFF00'); x.font = { bold: true }; x.border = bd; }); tot.getCell(5).numFmt = fmt;
+  ws.columns.forEach((c, i) => c.width = [22, 12, 12, 12, 18][i]);
+  const w2 = wb.addWorksheet('Detail Absensi');
+  w2.addRow(['Tanggal', 'Karyawan', 'Shift', 'Status']).eachCell(c => { c.fill = fill('FFC6E0B4'); c.font = { bold: true }; c.border = bd; });
+  (att || []).forEach(a => w2.addRow([a.work_date.split('-').reverse().join('/'), ((emps || []).find(e => e.id === a.employee_id) || {}).name || '?', a.shift_type, a.status]).eachCell(c => c.border = bd));
+  w2.columns.forEach(c => c.width = 16);
+  const buf = await wb.xlsx.writeBuffer(), l = document.createElement('a');
+  l.href = URL.createObjectURL(new Blob([buf])); l.download = `Rekap Absensi dan Gaji ${$('ab-month').value}.xlsx`; l.click();
 }
 </script>
 </body></html>

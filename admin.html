@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin - Kedai Kopi Sahaja</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+</head>
+<body class="bg-amber-50/40 text-gray-800 font-sans antialiased">
+<div id="login" class="fixed inset-0 bg-[#a00606] flex items-center justify-center z-50 p-4">
+ <div class="bg-white p-8 rounded-3xl shadow-2xl max-w-sm w-full border-4 border-[#fef2cc] space-y-3">
+  <h2 class="text-2xl font-black text-[#a00606] text-center">ADMIN SAHAJA 🌻</h2>
+  <input id="a-name" class="w-full border-2 border-amber-200 rounded-xl p-3 bg-amber-50/30 font-medium" placeholder="Nama admin">
+  <input id="a-pin" type="password" class="w-full border-2 border-amber-200 rounded-xl p-3 bg-amber-50/30 font-medium" placeholder="PIN">
+  <button onclick="adminLogin()" class="w-full bg-[#b30b0b] text-[#fef2cc] font-bold py-3 rounded-xl">Masuk Admin</button>
+ </div>
+</div>
+<header class="bg-[#b30b0b] text-white px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-3 shadow-xl border-b-4 border-[#fef2cc] sticky top-0 z-40">
+ <h1 class="text-xl font-black text-[#fef2cc]">KEDAI KOPI SAHAJA. <span class="text-xs text-amber-200">Admin</span></h1>
+ <nav class="flex flex-wrap bg-[#a00606] rounded-xl p-1 text-sm font-bold border border-red-800" id="nav"></nav>
+</header>
+<main class="max-w-5xl mx-auto p-4 sm:p-6 space-y-6">
+ <section id="s-monitor" class="sec bg-white p-6 rounded-3xl shadow-md border border-amber-100 space-y-3">
+  <h3 class="font-black text-[#a00606] uppercase">Monitoring Karyawan (Hari Ini)</h3>
+  <table class="w-full text-xs text-left"><thead><tr class="bg-amber-50 font-bold"><th class="p-3">Karyawan</th><th class="p-3">Status</th><th class="p-3">Shift</th></tr></thead><tbody id="monitor-rows" class="divide-y divide-amber-50"></tbody></table>
+  <h3 class="font-black text-[#a00606] uppercase pt-4">Laporan Masuk Hari Ini</h3>
+  <div id="report-list" class="space-y-3"></div>
+ </section>
+ <section id="s-absen" class="sec hidden bg-white p-6 rounded-3xl shadow-md border border-amber-100 space-y-3">
+  <h3 class="font-black text-[#a00606] uppercase">Absensi & Gaji (Bulan Ini)</h3>
+  <div class="flex flex-wrap gap-2 bg-amber-50 p-3 rounded-2xl border border-amber-200 text-xs">
+   <select id="ab-emp" class="border border-amber-200 rounded-xl p-2 bg-white font-bold"></select>
+   <select id="ab-shift" class="border border-amber-200 rounded-xl p-2 bg-white font-bold"><option value="pagi">Pagi</option><option value="malam">Malam</option></select>
+   <select id="ab-status" class="border border-amber-200 rounded-xl p-2 bg-white font-bold"><option value="hadir">Hadir</option><option value="izin">Izin</option><option value="sakit">Sakit</option></select>
+   <button onclick="setAbsen()" class="bg-[#b30b0b] text-[#fef2cc] font-bold px-4 rounded-xl">Simpan Hari Ini</button>
+  </div>
+  <table class="w-full text-xs text-left"><thead><tr class="bg-amber-50 font-bold"><th class="p-3">Karyawan</th><th class="p-3">Hadir</th><th class="p-3">Izin</th><th class="p-3">Sakit</th><th class="p-3 text-right">Gaji (Rp 35.000/shift)</th></tr></thead><tbody id="absen-rows" class="divide-y divide-amber-50"></tbody></table>
+ </section>
+ <section id="s-stok" class="sec hidden bg-white p-6 rounded-3xl shadow-md border border-amber-100 space-y-3">
+  <h3 class="font-black text-[#a00606] uppercase">Stok Barang</h3>
+  <div class="flex flex-wrap gap-2 bg-amber-50 p-3 rounded-2xl border border-amber-200 text-xs">
+   <input id="st-name" list="st-list" class="border border-amber-200 rounded-xl p-2 bg-white font-bold" placeholder="Nama barang (sama dgn menu)">
+   <datalist id="st-list"></datalist>
+   <input id="st-qty" type="number" class="border border-amber-200 rounded-xl p-2 bg-white font-bold w-28" placeholder="Jumlah masuk">
+   <button onclick="addStock()" class="bg-[#b30b0b] text-[#fef2cc] font-bold px-4 rounded-xl">+ Barang Masuk</button>
+  </div>
+  <table class="w-full text-xs text-left"><thead><tr class="bg-amber-50 font-bold"><th class="p-3">Barang</th><th class="p-3 text-right">Stok</th></tr></thead><tbody id="stock-rows" class="divide-y divide-amber-50"></tbody></table>
+ </section>
+ <section id="s-grafik" class="sec hidden space-y-6">
+  <div class="flex flex-wrap gap-2">
+   <div class="flex flex-wrap gap-2 items-center bg-white p-3 rounded-2xl border border-amber-200 text-xs">
+   <input id="x-from" type="date" class="border border-amber-200 rounded-xl p-2 font-bold"> s/d <input id="x-to" type="date" class="border border-amber-200 rounded-xl p-2 font-bold">
+   <input id="x-sc" type="number" placeholder="Saldo awal Cash" class="border border-amber-200 rounded-xl p-2 font-bold w-36"><input id="x-sq" type="number" placeholder="Saldo awal QRIS" class="border border-amber-200 rounded-xl p-2 font-bold w-36">
+   <button onclick="exportExcel()" class="bg-emerald-600 text-white font-bold px-4 py-2.5 rounded-xl text-xs uppercase">Rekap ke Excel</button></div>
+   <span class="text-[10px] text-gray-500 self-center">Grafik update otomatis (real time)</span>
+  </div>
+  <div class="grid md:grid-cols-2 gap-6" id="charts"></div>
+ </section>
+</main>
+<script>
+const SUPABASE_URL = "https://obrbnenfojqdepqzxain.supabase.co";
+const SUPABASE_ANON_KEY = "ISI_DENGAN_ANON_KEY_YANG_SAMA_SEPERTI_DI_index.html";
+const GAJI_PER_SHIFT = 35000;
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const $ = id => document.getElementById(id);
+const rp = n => 'Rp ' + (n || 0).toLocaleString('id-ID');
+const wib = d => new Date(d).toLocaleDateString('sv-SE', { timeZone: 'Asia/Jakarta' });
+const today = wib(new Date());
+const monthStart = today.slice(0, 8) + '01';
+const dayStart = today + 'T00:00:00+07:00';
+let charts = {};
+
+const tabs = [['monitor','👀 Monitoring'],['absen','🗓️ Absensi & Gaji'],['stok','📦 Stok'],['grafik','📊 Grafik & Excel']];
+$('nav').innerHTML = tabs.map(([k, l]) => `<button onclick="tab('${k}')" id="t-${k}" class="px-4 py-1.5 rounded-lg text-[#fef2cc] transition">${l}</button>`).join('');
+function tab(k) {
+  document.querySelectorAll('.sec').forEach(s => s.classList.add('hidden'));
+  $('s-' + k).classList.remove('hidden');
+  tabs.forEach(([x]) => $('t-' + x).className = 'px-4 py-1.5 rounded-lg transition ' + (x === k ? 'bg-[#fef2cc] text-[#a00606]' : 'text-[#fef2cc]'));
+}
+tab('monitor');
+
+async function adminLogin() {
+  const { data } = await sb.from('employees').select('id').eq('name', $('a-name').value.trim()).eq('pin', $('a-pin').value).eq('role', 'admin').limit(1);
+  if (!data || !data.length) return alert('Nama/PIN admin salah');
+  sessionStorage.setItem('admin', '1'); $('login').classList.add('hidden'); start();
+}
+if (sessionStorage.getItem('admin')) { $('login').classList.add('hidden'); start(); }
+
+function start() {
+  loadAll();
+  sb.channel('rt').on('postgres_changes', { event: '*', schema: 'public' }, () => loadAll()).subscribe();
+  setInterval(loadAll, 20000);
+}
+async function loadAll() { await Promise.all([monitor(), absensi(), stok(), grafik()]); }
+
+async function monitor() {
+  const [{ data: emps }, { data: open }, { data: att }, { data: reps }] = await Promise.all([
+    sb.from('employees').select('id,name').eq('role', 'karyawan').eq('active', true),
+    sb.from('shifts').select('employee_id,shift_type').eq('status', 'open'),
+    sb.from('attendance').select('employee_id,status,shift_type').eq('work_date', today),
+    sb.from('reports').select('*').gte('created_at', dayStart).order('created_at', { ascending: false })]);
+  $('monitor-rows').innerHTML = (emps || []).map(e => {
+    const o = (open || []).find(s => s.employee_id === e.id), a = (att || []).find(x => x.employee_id === e.id);
+    let st = '<span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded font-bold">Libur</span>', sh = '-';
+    if (o) { st = '<span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">Sedang Bekerja</span>'; sh = o.shift_type || '-'; }
+    else if (a && a.status !== 'hadir') { st = `<span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-bold">${a.status}</span>`; sh = a.shift_type; }
+    return `<tr><td class="p-3 font-bold">${e.name}</td><td class="p-3">${st}</td><td class="p-3 capitalize">${sh}</td></tr>`;
+  }).join('') || '<tr><td colspan="3" class="p-4 text-center text-gray-400">Belum ada karyawan</td></tr>';
+  $('ab-emp').innerHTML = (emps || []).map(e => `<option value="${e.id}">${e.name}</option>`).join('');
+  $('report-list').innerHTML = (reps || []).map(r => `<pre class="bg-gray-900 text-amber-200 p-4 rounded-2xl font-mono text-xs whitespace-pre-wrap">${r.report_text}</pre>`).join('') || '<p class="text-xs text-gray-400">Belum ada laporan masuk hari ini</p>';
+}
+
+async function setAbsen() {
+  const { error } = await sb.from('attendance').upsert({ employee_id: $('ab-emp').value, work_date: today, shift_type: $('ab-shift').value, status: $('ab-status').value }, { onConflict: 'employee_id,work_date,shift_type' });
+  if (error) alert(error.message); else loadAll();
+}
+async function absensi() {
+  const [{ data: emps }, { data: att }] = await Promise.all([
+    sb.from('employees').select('id,name').eq('role', 'karyawan'),
+    sb.from('attendance').select('employee_id,status').gte('work_date', monthStart)]);
+  $('absen-rows').innerHTML = (emps || []).map(e => {
+    const c = s => (att || []).filter(a => a.employee_id === e.id && a.status === s).length;
+    return `<tr><td class="p-3 font-bold">${e.name}</td><td class="p-3">${c('hadir')}</td><td class="p-3">${c('izin')}</td><td class="p-3">${c('sakit')}</td><td class="p-3 text-right font-black">${rp(c('hadir') * GAJI_PER_SHIFT)}</td></tr>`;
+  }).join('');
+}
+
+async function stok() {
+  const { data } = await sb.from('stock').select('*').order('product_name');
+  $('stock-rows').innerHTML = (data || []).map(s => `<tr><td class="p-3 font-bold">${s.product_name}</td><td class="p-3 text-right font-black ${s.qty <= 5 ? 'text-red-600' : ''}">${s.qty}</td></tr>`).join('');
+  $('st-list').innerHTML = (data || []).map(s => `<option value="${s.product_name}">`).join('');
+}
+async function addStock() {
+  const n = $('st-name').value.trim(), q = parseInt($('st-qty').value);
+  if (!n || !q) return alert('Isi nama & jumlah');
+  const { error } = await sb.rpc('add_stock', { p_name: n, p_qty: q });
+  if (error) alert(error.message); else { $('st-qty').value = ''; loadAll(); }
+}
+
+function mk(id, title, type, labels, data, extra = {}) {
+  if (!$('c-' + id)) $('charts').insertAdjacentHTML('beforeend', `<div class="bg-white p-4 rounded-3xl shadow-md border border-amber-100"><h4 class="text-xs font-black text-amber-900 uppercase mb-2">${title}</h4><canvas id="c-${id}"></canvas></div>`);
+  if (charts[id]) charts[id].destroy();
+  charts[id] = new Chart($('c-' + id), { type, data: { labels, datasets: [{ label: title, data, backgroundColor: ['#b30b0b', '#f59e0b', '#2563eb', '#059669', '#7c3aed', '#db2777', '#0891b2'], borderColor: '#b30b0b' }] }, options: { indexAxis: extra.axis || 'x', plugins: { legend: { display: type === 'doughnut' } } } });
+}
+async function grafik() {
+  const since = new Date(Date.now() - 13 * 864e5).toISOString();
+  let [{ data: tx }, { data: ex }, { data: att }] = await Promise.all([
+    sb.from('transactions').select('total_price,payment_method,items_ordered,created_at').gte('created_at', since),
+    sb.from('expenses').select('price,created_at').gte('created_at', since),
+    sb.from('attendance').select('status').gte('work_date', monthStart)]);
+  tx = tx || []; window._tx = tx;
+  const sum = (arr, f) => arr.reduce((a, x) => a + f(x), 0);
+  const days = [...new Set(tx.map(t => wib(t.created_at)))].sort();
+  mk('omzet', 'Omzet 14 Hari (Rp)', 'line', days, days.map(d => sum(tx.filter(t => wib(t.created_at) === d), t => t.total_price)));
+  const tt = tx.filter(t => wib(t.created_at) === today), hrs = [...Array(24).keys()];
+  mk('jam', 'Penjualan Hari Ini per Jam (Rp)', 'bar', hrs.map(h => h + ':00'), hrs.map(h => sum(tt.filter(t => +new Date(t.created_at).toLocaleString('en-GB', { hour: '2-digit', hour12: false, timeZone: 'Asia/Jakarta' }) === h), t => t.total_price)));
+  mk('bayar', 'Metode Bayar Hari Ini', 'doughnut', ['Tunai', 'QRIS'], ['Tunai', 'QRIS'].map(m => sum(tt.filter(t => t.payment_method === m), t => t.total_price)));
+  const items = {}; tt.forEach(t => (t.items_ordered || []).forEach(i => items[i.name] = (items[i.name] || 0) + i.qty));
+  const top = Object.entries(items).sort((a, b) => b[1] - a[1]).slice(0, 10);
+  mk('top', 'Menu Terlaris Hari Ini', 'bar', top.map(x => x[0]), top.map(x => x[1]), { axis: 'y' });
+  const ed = [...new Set((ex || []).map(e => wib(e.created_at)))].sort();
+  mk('exp', 'Pengeluaran 14 Hari (Rp)', 'bar', ed, ed.map(d => sum((ex || []).filter(e => wib(e.created_at) === d), e => e.price)));
+  mk('abs', 'Absensi Bulan Ini', 'doughnut', ['Hadir', 'Izin', 'Sakit'], ['hadir', 'izin', 'sakit'].map(s => (att || []).filter(a => a.status === s).length));
+}
+
+// Excel mengikuti format Laporan Keuangan Kedai (kolom A-K)
+$('x-to').value = today; $('x-from').value = wib(Date.now() - 6 * 864e5);
+async function exportExcel() {
+  const from = $('x-from').value, to = $('x-to').value, sc = parseInt($('x-sc').value) || 0, sq = parseInt($('x-sq').value) || 0;
+  if (!from || !to) return alert('Pilih tanggal');
+  const a = from + 'T00:00:00+07:00', b = to + 'T23:59:59+07:00';
+  const [{ data: tx }, { data: ex }, { data: sh }] = await Promise.all([
+    sb.from('transactions').select('total_price,payment_method,created_at').gte('created_at', a).lte('created_at', b),
+    sb.from('expenses').select('item_name,qty,price,pay,created_at').gte('created_at', a).lte('created_at', b).order('created_at'),
+    sb.from('shifts').select('cashier_name,shift_type,created_at').gte('created_at', a).lte('created_at', b)]);
+  const days = []; for (let d = new Date(from + 'T00:00:00Z'); d <= new Date(to + 'T00:00:00Z'); d = new Date(d.getTime() + 864e5)) days.push(d.toISOString().slice(0, 10));
+  const wb = new ExcelJS.Workbook(), ws = wb.addWorksheet('Sheet1');
+  const fill = c => ({ type: 'pattern', pattern: 'solid', fgColor: { argb: c } });
+  const thin = { style: 'thin' }, bd = { top: thin, left: thin, bottom: thin, right: thin };
+  const heads = [['TANGGAL', 'FFD9D9D9'], ['KETERANGAN', 'FFD9D9D9'], ['PEMASUKAN CASH', 'FFC6E0B4'], ['PEMASUKAN QRIS', 'FFC6E0B4'], ['JUMLAH', 'FFDDEBF7'], ['KETERANGAN', 'FFD9D9D9'], ['PENGELUARAN CASH', 'FFF4B183'], ['PENGELUARAN QRIS', 'FFF4B183'], ['SALDO', 'FFD9D9D9'], ['Shift', 'FFFFFF00'], ['', 'FFFFFF00']];
+  ws.addRow(heads.map(h => h[0])).eachCell({ includeEmpty: true }, (c, i) => { c.fill = fill(heads[i - 1][1]); c.font = { bold: true }; c.alignment = { horizontal: 'center' }; c.border = bd; });
+  ws.mergeCells('J1:K1');
+  ws.addRow(['', 'Saldo awal', sc, sq]);
+  let saldo = sc + sq, r = 3, sumC = 0, sumQ = 0, sumG = 0, sumH = 0;
+  const day = t => wib(t.created_at);
+  days.forEach(d => {
+    const t = (tx || []).filter(x => day(x) === d), cash = t.filter(x => x.payment_method !== 'QRIS').reduce((s, x) => s + x.total_price, 0), qris = t.filter(x => x.payment_method === 'QRIS').reduce((s, x) => s + x.total_price, 0);
+    const es = (ex || []).filter(x => day(x) === d), ss = (sh || []).filter(x => day(x) === d);
+    const pagi = (ss.find(x => x.shift_type === 'pagi') || {}).cashier_name || '', malam = (ss.find(x => x.shift_type === 'malam') || {}).cashier_name || '';
+    const n = Math.max(1, es.length);
+    for (let i = 0; i < n; i++) {
+      const e = es[i], g = e && e.pay !== 'qris' ? e.price : 0, h = e && e.pay === 'qris' ? e.price : 0, c = i ? 0 : cash, q = i ? 0 : qris;
+      saldo += c + q - g - h; sumC += c; sumQ += q; sumG += g; sumH += h;
+      const row = ws.addRow([i ? '' : d.split('-').reverse().join('/'), i ? '' : 'Pendapatan Harian', i ? '' : c, i ? '' : q, e ? e.qty : '', e ? e.item_name : '', g || '', h || '', { formula: `I${r - 1}+N(C${r})+N(D${r})-N(G${r})-N(H${r})`.replace(`I${r - 1}`, r === 3 ? '(C2+D2)' : `I${r - 1}`), result: saldo }, i ? '' : pagi, i ? '' : malam]);
+      row.eachCell({ includeEmpty: true }, c => { c.border = bd; if (c.col >= 3 && c.col <= 9 && c.col !== 5 && c.col !== 6) c.numFmt = '"Rp" #,##0.00'; });
+      r++;
+    }
+  });
+  const tot = ws.addRow(['', '', { formula: `SUM(C3:C${r - 1})`, result: sumC }, { formula: `SUM(D3:D${r - 1})`, result: sumQ }, '', '', { formula: `SUM(G3:G${r - 1})`, result: sumG }, { formula: `SUM(H3:H${r - 1})`, result: sumH }]);
+  tot.eachCell({ includeEmpty: true }, (c, i) => { c.fill = fill('FFFFFF00'); c.numFmt = '"Rp" #,##0.00'; });
+  const big = ws.addRow(['', 'TOTAL', { formula: `C${r}+D${r}`, result: sumC + sumQ }, '', '', 'TOTAL', { formula: `G${r}+H${r}`, result: sumG + sumH }, '', { formula: `I${r - 1}`, result: saldo }]);
+  big.height = 36; big.font = { bold: true, size: 16 };
+  [3, 7, 9].forEach(i => { big.getCell(i).fill = fill('FFE2EFDA'); big.getCell(i).numFmt = '"Rp" #,##0.00'; });
+  ws.columns.forEach((c, i) => c.width = [14, 20, 20, 20, 9, 22, 20, 20, 20, 16, 16][i]);
+  const buf = await wb.xlsx.writeBuffer(), l = document.createElement('a');
+  l.href = URL.createObjectURL(new Blob([buf])); l.download = `Laporan Keuangan Kedai ${from} - ${to}.xlsx`; l.click();
+}
+</script>
+</body></html>

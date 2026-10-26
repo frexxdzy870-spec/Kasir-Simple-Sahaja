@@ -64,6 +64,7 @@
   <div class="flex flex-wrap gap-2 text-xs">
    <button onclick="resetData('absen')" class="bg-red-50 text-red-700 border border-red-200 font-bold px-3 py-2 rounded-xl">Reset absensi bulan ini</button>
    <button onclick="resetData('stok')" class="bg-red-50 text-red-700 border border-red-200 font-bold px-3 py-2 rounded-xl">Reset semua stok ke 0</button>
+   <button onclick="resetData('shift')" class="bg-red-50 text-red-700 border border-red-200 font-bold px-3 py-2 rounded-xl">Tutup semua shift yang masih terbuka</button>
    <button onclick="resetData('laporan')" class="bg-red-50 text-red-700 border border-red-200 font-bold px-3 py-2 rounded-xl">Hapus laporan masuk hari ini</button></div>
  </section>
  <section id="s-grafik" class="sec hidden space-y-6">
@@ -79,7 +80,7 @@
 </main>
 <script>
 const SUPABASE_URL = "https://obrbnenfojqdepqzxain.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9icmJuZW5mb2pxZGVwcXp4YWluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2NDU2MDAsImV4cCI6MjA5MjIyMTYwMH0.Ef0uELb-CwYxlKpK_DggIrfX0NZDHiyEHTIcZmseyzk";
+const SUPABASE_ANON_KEY = "ISI_DENGAN_ANON_KEY_YANG_SAMA_SEPERTI_DI_index.html";
 const GAJI_PER_SHIFT = 35000;
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const $ = id => document.getElementById(id);
@@ -116,13 +117,13 @@ async function loadAll() { await Promise.all([monitor(), absensi(), stok(), graf
 async function monitor() {
   const [{ data: emps }, { data: open }, { data: att }, { data: reps }] = await Promise.all([
     sb.from('employees').select('id,name').eq('role', 'karyawan').eq('active', true),
-    sb.from('shifts').select('employee_id,shift_type').eq('status', 'open'),
+    sb.from('shifts').select('id,employee_id,shift_type').eq('status', 'open'),
     sb.from('attendance').select('employee_id,status,shift_type').eq('work_date', today),
     sb.from('reports').select('*').gte('created_at', dayStart).order('created_at', { ascending: false })]);
   $('monitor-rows').innerHTML = (emps || []).map(e => {
     const o = (open || []).find(s => s.employee_id === e.id), a = (att || []).find(x => x.employee_id === e.id);
     let st = '<span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded font-bold">Libur</span>', sh = '-';
-    if (o) { st = '<span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">Sedang Bekerja</span>'; sh = o.shift_type || '-'; }
+    if (o) { st = '<span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">Sedang Bekerja</span>'; sh = (o.shift_type || '-') + ` <button onclick="forceEnd('${o.id}')" class="ml-2 text-[#b30b0b] font-bold underline">Akhiri</button>`; }
     else if (a && a.status !== 'hadir') { st = `<span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-bold">${a.status}</span>`; sh = a.shift_type; }
     return `<tr><td class="p-3 font-bold">${e.name}</td><td class="p-3">${st}</td><td class="p-3 capitalize">${sh}</td></tr>`;
   }).join('') || '<tr><td colspan="3" class="p-4 text-center text-gray-400">Belum ada karyawan</td></tr>';
@@ -284,6 +285,7 @@ async function resetData(k) {
   if ((prompt('Ketik RESET untuk melanjutkan:') || '') !== 'RESET') return;
   if (k === 'absen') done(await sb.from('attendance').delete().gte('work_date', monthRange()[0]).lt('work_date', monthRange()[1]));
   if (k === 'stok') done(await sb.from('stock').update({ qty: 0 }).neq('product_name', ''));
+  if (k === 'shift') done(await sb.from('shifts').update({ status: 'closed' }).eq('status', 'open'));
   if (k === 'laporan') done(await sb.from('reports').delete().gte('created_at', dayStart));
 }
 
@@ -313,6 +315,13 @@ async function exportAbsensi() {
   w2.columns.forEach(c => c.width = 16);
   const buf = await wb.xlsx.writeBuffer(), l = document.createElement('a');
   l.href = URL.createObjectURL(new Blob([buf])); l.download = `Rekap Absensi dan Gaji ${$('ab-month').value}.xlsx`; l.click();
+}
+
+async function forceEnd(id) {
+  if (!confirm('Akhiri shift karyawan ini dari admin?')) return;
+  let r = await sb.from('shifts').update({ status: 'closed', end_time: new Date().toISOString() }).eq('id', id);
+  if (r.error) r = await sb.from('shifts').update({ status: 'closed' }).eq('id', id);
+  if (r.error) alert(r.error.message); else loadAll();
 }
 </script>
 </body></html>

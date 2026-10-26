@@ -28,12 +28,20 @@
     const name = $('shift-username').value.trim(), pin = $('shift-pin').value, st = $('shift-type').value;
     if (!name || !pin) return alert('Nama dan PIN wajib diisi!');
     try {
-      const { data: emp, error: empErr } = await sb.from('employees').select('id,name,role').ilike('name', name).eq('pin', pin.trim()).neq('active', false).limit(1);
+      const { data: all, error: empErr } = await sb.from('employees').select('id,name,pin,role,active');
       if (empErr) return alert('Gagal cek karyawan (bukan salah PIN): ' + empErr.message);
-      if (!emp || !emp.length) return alert('Nama atau PIN salah (atau data karyawan tidak terbaca, cek RLS/tabel employees)');
+      if (!all || !all.length) return alert('Data karyawan tidak terbaca / kosong. Jalankan fix.sql (matikan RLS tabel employees) dan pastikan ada isinya.');
+      const norm = v => String(v == null ? '' : v).trim().toLowerCase();
+      const emp = all.filter(x => norm(x.name) === norm(name) && norm(x.pin) === norm(pin) && x.active !== false);
+      if (!emp.length) {
+        const byName = all.find(x => norm(x.name) === norm(name));
+        return alert(!byName ? 'Nama "' + name + '" tidak ditemukan di tabel employees' : byName.active === false ? 'Akun ini nonaktif (kolom active = false)' : 'PIN tidak cocok untuk nama ini');
+      }
       const e = emp[0];
       if (e.role === 'admin') { sessionStorage.setItem('admin', '1'); return (location.href = 'admin.html'); }
       const label = `${e.name} ${st === 'pagi' ? 'Pagi' : 'Malam'}`;
+      // Tutup shift lama yang masih 'open' milik karyawan ini agar tidak dobel
+      await sb.from('shifts').update({ status: 'closed', end_time: new Date().toISOString() }).eq('employee_id', e.id).eq('status', 'open');
       const { data, error } = await sb.from('shifts').insert([{ cashier_name: label, initial_cash: 0, status: 'open', employee_id: e.id, shift_type: st }]).select('id');
       if (error) return alert('Gagal Simpan Shift: ' + error.message);
       // Absen hadir otomatis saat login
@@ -113,5 +121,17 @@
     if (snap.length && Object.keys(cart).length === 0) {
       for (const it of snap) await sb.rpc('decrement_stock', { p_name: it.name, p_qty: it.qty });
     }
+  };
+
+  // Akhiri shift: pastikan benar-benar tertutup (status admin jadi Libur)
+  window.endShift = async function () {
+    if (!currentShiftId || !confirm('Akhiri shift sekarang?')) return;
+    const t = new Date().toISOString();
+    let r = await sb.from('shifts').update({ status: 'closed', end_time: t }).eq('id', currentShiftId);
+    if (r.error) r = await sb.from('shifts').update({ status: 'closed' }).eq('id', currentShiftId); // jika kolom end_time bermasalah
+    if (r.error) return alert('Gagal mengakhiri shift: ' + r.error.message);
+    await sb.from('shifts').update({ status: 'closed' }).eq('cashier_name', currentCashier).eq('status', 'open');
+    localStorage.removeItem('currentShiftId'); localStorage.removeItem('currentCashier');
+    location.reload();
   };
 })();

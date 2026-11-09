@@ -133,6 +133,7 @@
                     <button onclick="filterMenu('MAKANAN')" id="filter-makanan" class="snap-center shrink-0 bg-white border border-amber-100 text-amber-950 px-4 py-2 rounded-xl text-xs font-bold hover:bg-amber-50 transition">Makanan</button>
                     <button onclick="filterMenu('JAJANAN')" id="filter-jajanan" class="snap-center shrink-0 bg-white border border-amber-100 text-amber-950 px-4 py-2 rounded-xl text-xs font-bold hover:bg-amber-50 transition">Jajanan</button>
                     <button onclick="filterMenu('ROKOK')" id="filter-rokok" class="snap-center shrink-0 bg-white border border-amber-100 text-amber-950 px-4 py-2 rounded-xl text-xs font-bold hover:bg-amber-50 transition">Rokok</button>
+                    <button onclick="filterMenu('BUNDLING')" id="filter-bundling" class="snap-center shrink-0 bg-white border border-amber-100 text-amber-950 px-4 py-2 rounded-xl text-xs font-bold hover:bg-amber-50 transition">Bundling</button>
                 </div>
             </div>
 
@@ -234,70 +235,68 @@
         // MASTER MENU SESUAI GAMBAR DAN REKOMENDASI TAMBAHAN KATEGORI
         const hardcodedProducts = [
             // TEA SAHAJA SERIES
-            { id: "t1", name: "Ice Tea", price: 4000, category: "TEA SAHAJA" },
-            { id: "t2", name: "BIG Ice Tea", price: 6000, category: "TEA SAHAJA" },
-            { id: "t3", name: "Manggo Tea", price: 7000, category: "TEA SAHAJA" },
-            { id: "t4", name: "Grape Tea", price: 7000, category: "TEA SAHAJA" },
-            { id: "t5", name: "Orange Tea", price: 7000, category: "TEA SAHAJA" },
-            { id: "t6", name: "Peach Oolong Tea", price: 6000, category: "TEA SAHAJA" },
-            { id: "t7", name: "BIG Peach Oolong Tea ", price: 8000, category: "TEA SAHAJA" },
-            { id: "t8", name: "Tarik Tea", price: 12000, category: "TEA SAHAJA" },
+            { id: "t1", name: "Ice Tea", price: 5000, category: "TEA SAHAJA" },
+            { id: "t2", name: "Manggo Tea", price: 7000, category: "TEA SAHAJA" },
+            { id: "t3", name: "Grape Tea", price: 7000, category: "TEA SAHAJA" },
+            { id: "t4", name: "Orange Tea", price: 7000, category: "TEA SAHAJA" },
+            { id: "t5", name: "Peach Oolong Tea", price: 9000, category: "TEA SAHAJA" },
+            { id: "t6", name: "Teh Tarik Malaysia", price: 12000, category: "TEA SAHAJA" },
             // AMERICANO SAHAJA SERIES
             { id: "a1", name: "Original Espresso", price: 9000, category: "AMERICANO SAHAJA" },
             { id: "a2", name: "Grape Americano", price: 9000, category: "AMERICANO SAHAJA" },
             { id: "a3", name: "Manggo Americano", price: 9000, category: "AMERICANO SAHAJA" },
             { id: "a4", name: "Orange Americano", price: 9000, category: "AMERICANO SAHAJA" },
             // ICE COFFEE SAHAJA SERIES
-            { id: "c1", name: "Ice Kopi Susu", price: 8000, category: "ICE COFFEE SAHAJA" },
+            { id: "c1", name: "Ice Kopi Susu Vintage", price: 11000, category: "ICE COFFEE SAHAJA" },
             { id: "c2", name: "Ice Kopi Susu Gula Aren", price: 12000, category: "ICE COFFEE SAHAJA" },
             { id: "c3", name: "Ice Butterscotch Latte", price: 12000, category: "ICE COFFEE SAHAJA" },
             { id: "c4", name: "Ice Vanilla Latte", price: 12000, category: "ICE COFFEE SAHAJA" },
             // YAKULT SAHAJA SERIES
-            { id: "y1", name: "Orange Yakult", price: 10000, category: "YAKULT SAHAJA" },
-            { id: "y2", name: "Manggo Yakult", price: 10000, category: "YAKULT SAHAJA" },
-            { id: "y3", name: "Grape Yakult", price: 10000, category: "YAKULT SAHAJA" },
+            { id: "y1", name: "Orange Yakult", price: 11000, category: "YAKULT SAHAJA" },
+            { id: "y2", name: "Manggo Yakult", price: 11000, category: "YAKULT SAHAJA" },
+            { id: "y3", name: "Grape Yakult", price: 11000, category: "YAKULT SAHAJA" },
             // MILK SAHAJA SERIES
-            { id: "m1", name: "Ice Milk Chocolate", price: 10000, category: "MILK SAHAJA" },
-            { id: "m2", name: "Ice Pinky Milk Sahaja", price: 10000, category: "MILK SAHAJA" },
+            { id: "m1", name: "Ice Milk Chocolate", price: 12000, category: "MILK SAHAJA" },
+            { id: "m2", name: "Ice Pinky Sahaja", price: 10000, category: "MILK SAHAJA" },
             { id: "m3", name: "Ice Milk Grape", price: 10000, category: "MILK SAHAJA" },
             { id: "m4", name: "Ice Milk Manggo", price: 10000, category: "MILK SAHAJA" },
             { id: "m5", name: "Ice Milk Orange", price: 10000, category: "MILK SAHAJA" },
             // SQUASH SAHAJA SERIES
-            { id: "s1", name: "Orange Squash", price: 9000, category: "SQUASH SAHAJA" },
-            { id: "s2", name: "Grape Squash", price: 9000, category: "SQUASH SAHAJA" },
-            { id: "s3", name: "Manggo Squash", price: 9000, category: "SQUASH SAHAJA" },
+            { id: "s1", name: "Orange Squash", price: 10000, category: "SQUASH SAHAJA" },
+            { id: "s2", name: "Grape Squash", price: 10000, category: "SQUASH SAHAJA" },
+            { id: "s3", name: "Manggo Squash", price: 10000, category: "SQUASH SAHAJA" },
             // ANOTHER OF SAHAJA SERIES
-            { id: "ao1", name: "Original Josua", price: 8000, category: "ANOTHER OF SAHAJA" },
+            { id: "ao1", name: "Josua", price: 10000, category: "ANOTHER OF SAHAJA" },
             { id: "ao2", name: "KukuBima Susu", price: 8000, category: "ANOTHER OF SAHAJA" },
             { id: "ao3", name: "Soda Gembira", price: 8000, category: "ANOTHER OF SAHAJA" },
-            { id: "ao4", name: "Ice Dancow", price: 8000, category: "ANOTHER OF SAHAJA" },
+            { id: "ao4", name: "Ice Dancow", price: 9000, category: "ANOTHER OF SAHAJA" },
             { id: "ao5", name: "Air Botol", price: 3000, category: "ANOTHER OF SAHAJA" },
             { id: "ao5", name: "Take away", price: 1000, category: "ANOTHER OF SAHAJA" },
             // HOT COFFEE CATEGORY
             { id: "h1", name: "Kopi Hitam", price: 5000, category: "HOT COFFEE" },
             { id: "h2", name: "Kopi Susu", price: 6000, category: "HOT COFFEE" },
-            { id: "h3", name: "Kopi Ijo", price: 7000, category: "HOT COFFEE" },
-            { id: "h4", name: "Kopi Ijo susu", price: 8000, category: "HOT COFFEE" },
+            { id: "h3", name: "Kopi Ijo", price: 8000, category: "HOT COFFEE" },
+            { id: "h4", name: "Kopi Ijo susu", price: 9000, category: "HOT COFFEE" },
             // MAKANAN & JAJANAN
-            { id: "mk1", name: "Mie Instan", price: 6000, category: "MAKANAN" },
-            { id: "mk2", name: "Mie Instan + Telur", price: 9000, category: "MAKANAN" },
-            { id: "mk3", name: "Mie Nusantara", price: 12000, category: "MAKANAN" },
+            { id: "mk1", name: "Mie Instan", price: 7000, category: "MAKANAN" },
+            { id: "mk2", name: "Mie Instan + Telur", price: 10000, category: "MAKANAN" },
+            { id: "mk3", name: "Mie Nusantara", price: 16000, category: "MAKANAN" },
             { id: "mk4", name: "Nasi Pecel ", price: 7000, category: "MAKANAN" },
             { id: "mk5", name: "Basreng Chili Oil ", price: 13000,category: "MAKANAN"},
             { id: "mk6", name: "Sosis & Tempura Chili Oil ", price: 13000,category: "MAKANAN"},
             { id: "mk7", name: "Ice cream Vanilla ", price: 13000,category: "MAKANAN"},
             { id: "mk8", name: "Ice cream Stroberry ", price: 13000,category: "MAKANAN"},
             { id: "mk8", name: "Ice cream Coklat ", price: 13000,category: "MAKANAN"},
-            { id: "jj1", name: "Kentang Goreng", price: 10000, category: "JAJANAN" },
+            { id: "jj1", name: "Kentang Goreng", price: 12000, category: "JAJANAN" },
             { id: "jj2", name: "Piscok", price: 10000, category: "JAJANAN" },
-            { id: "jj3", name: "Mix Platter", price: 15000, category: "JAJANAN" },
+            { id: "jj3", name: "Mix Platter", price: 18000, category: "JAJANAN" },
             { id: "jj4", name: "Pluntir", price: 2000, category: "JAJANAN" },
             { id: "jj5", name: "Usus", price: 1000, category: "JAJANAN" },
             { id: "jj6", name: "Usus Besar", price: 2000, category: "JAJANAN" },
             { id: "jj7", name: "Krupuk Rambak", price: 2000, category: "JAJANAN" },
             { id: "jj8", name: "Kripik singkong", price: 5000, category: "JAJANAN" },
             { id: "jj9", name: "Gorengan", price: 1000, category: "JAJANAN" },
-            { id: "jj10", name: "Lumpia", price: 2000, category: "JAJANAN" },
+            
 
             // ROKOK
             { id: "rk1", name: "Eceran filter", price: 2000, category: "ROKOK" },
@@ -306,6 +305,13 @@
             { id: "rk4", name: "Chasna", price: 13000, category: "ROKOK" },
             { id: "rk5", name: "Gununug cengkeh", price: 12000, category: "ROKOK" },
             { id: "rk6", name: "Gajah Baru 12", price: 18000, category: "ROKOK" },
+
+            // BUNDLING
+            { id: "b1", name: "Menugas 1", price: 29000, category: "BUNDLING" },
+            { id: "b2", name: "Menugas 2", price: 25000, category: "BUNDLING" },
+            { id: "b3", name: "Menugas 3", price: 17000, category: "BUNDLING" },
+            { id: "b4", name: "Menugas 4", price: 18000, category: "BUNDLING" },
+            { id: "b5", name: "Menugas 5", price: 0, category: "BUNDLING" },
         ];
 
         let reportData = { cashierName: "", items: {}, revenue: 0, qris: 0, cash: 0 };
@@ -381,7 +387,7 @@
                 'ALL': 'filter-all', 'TEA SAHAJA': 'filter-tea', 'AMERICANO SAHAJA': 'filter-americano',
                 'ICE COFFEE SAHAJA': 'filter-icecoffee', 'YAKULT SAHAJA': 'filter-yakult', 'MILK SAHAJA': 'filter-milk',
                 'SQUASH SAHAJA': 'filter-squash', 'ANOTHER OF SAHAJA': 'filter-another', 'HOT COFFEE': 'filter-hot',
-                'MAKANAN': 'filter-makanan', 'JAJANAN': 'filter-jajanan', 'ROKOK': 'filter-rokok'
+                'MAKANAN': 'filter-makanan', 'JAJANAN': 'filter-jajanan', 'ROKOK': 'filter-rokok','BUNDLING': 'filter-bundling'
             };
             Object.values(targetIdMap).forEach(id => {
                 const el = document.getElementById(id);
@@ -574,7 +580,7 @@
             let txt = `*Laporan Keuangan ${reportData.cashierName} ${tgl}*\n\n`;
             const categories = [
                 "TEA SAHAJA", "AMERICANO SAHAJA", "ICE COFFEE SAHAJA", "YAKULT SAHAJA", 
-                "MILK SAHAJA", "SQUASH SAHAJA", "ANOTHER OF SAHAJA", "HOT COFFEE", "MAKANAN", "JAJANAN", "ROKOK"
+                "MILK SAHAJA", "SQUASH SAHAJA", "ANOTHER OF SAHAJA", "HOT COFFEE", "MAKANAN", "JAJANAN", "ROKOK", "BUNDLING"
             ];
 
             categories.forEach(k => {

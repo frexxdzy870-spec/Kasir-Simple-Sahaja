@@ -1,0 +1,41 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+buildscript {
+    ext {
+        coreVersion = '2.7.41'
+        medianCoreVersion = '4.1.2'
+        iconsVersion = '1.4.0'
+    }
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:9.0.1'
+        //[enabled by builder] classpath 'com.google.gms:google-services:4.5.0'
+        //[enabled by builder] classpath 'com.google.firebase:firebase-crashlytics-gradle:3.0.7'
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url 'https://maven.median.co' }
+        maven { url("$rootDir/maven") }
+        //[additional plugin repositories]
+    }
+
+    configurations.configureEach {
+        resolutionStrategy.dependencySubstitution {
+            substitute module('com.github.gonativeio:gonative-android-core') using module("co.median.android:core:$coreVersion")
+        }
+        resolutionStrategy {
+            force "co.median.android:core:$coreVersion"
+            force "co.median:median-core:$medianCoreVersion"
+        }
+    }
+}

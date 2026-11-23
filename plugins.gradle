@@ -1,0 +1,118 @@
+import groovy.json.JsonSlurper
+import org.gradle.initialization.DefaultSettings
+
+// Plugin wiring for median-core.
+//
+// Plugins register themselves at runtime via ServiceLoader (each ships a
+// META-INF/services/co.median.core.bridge.AndroidBridgeModule resource, merged across
+// modules/AARs), so there is NO generated PackageList — the build only needs to put each
+// plugin on the app classpath:
+//   - local (symlinked) plugins: included as Gradle modules from plugins/*/
+//   - compiled plugins: added as AAR dependencies from dependencies.json
+class GoNativeModules {
+    private Logger logger
+    private ArrayList<HashMap<String, String>> localPluginsMetadata
+
+    GoNativeModules(Logger logger) {
+        this.logger = logger
+        this.localPluginsMetadata = new ArrayList<HashMap<String, String>>()
+    }
+
+    void scanLocalPlugins() {
+        this.localPluginsMetadata.clear()
+
+        def pluginsRoot = new File(System.getProperty("user.dir"), 'plugins')
+        if (!pluginsRoot.isDirectory()) return
+
+        pluginsRoot.eachDir { pluginDir ->
+            def jsonFile = new File(pluginDir, 'src/main/resources/META-INF/plugin-metadata.json')
+            if (jsonFile.isFile()) {
+                def parsedJson = new JsonSlurper().parseText(jsonFile.text).plugin
+                parsedJson["sourceDir"] = "plugins/${pluginDir.name}"
+                this.localPluginsMetadata.push(parsedJson)
+                this.logger.info("Found local plugin: ${parsedJson.pluginName} at ${parsedJson.sourceDir}")
+            }
+        }
+    }
+
+    void addModuleProjects(DefaultSettings defaultSettings) {
+        this.localPluginsMetadata.forEach { module ->
+            String pluginName = module["pluginName"]
+            String sourceDir = module["sourceDir"]
+            this.logger.info("Including local plugin project: ${pluginName} from ${sourceDir}")
+            defaultSettings.include(":${pluginName}")
+            defaultSettings.project(":${pluginName}").projectDir = new File(defaultSettings.rootProject.projectDir, "./${sourceDir}")
+
+            // Include local library required by the plugin
+            String localLibrary = module["localLibrary"]
+            if (localLibrary != null && !localLibrary.isEmpty()) {
+                defaultSettings.include(":${localLibrary}")
+                defaultSettings.project(":${localLibrary}").projectDir = new File(defaultSettings.rootProject.projectDir, "./${sourceDir}/${localLibrary}")
+            }
+        }
+    }
+
+    void addLocalModuleDependencies(Project appProject) {
+        this.localPluginsMetadata.forEach { module ->
+            String pluginName = module["pluginName"]
+            this.logger.info("Adding local project dependency: ${pluginName}")
+            appProject.dependencies {
+                implementation project(path: ":${pluginName}")
+            }
+        }
+    }
+
+    void addPluginDependenciesFromJson(Project project) {
+        File dependenciesFile = new File(project.rootDir, "dependencies.json")
+        if (!dependenciesFile.exists()) {
+            logger.warn("dependencies.json file not found at ${dependenciesFile.absolutePath}")
+            return
+        }
+
+        try {
+            def jsonSlurper = new JsonSlurper()
+            def dependencies = jsonSlurper.parseText(dependenciesFile.text)
+            def plugins = dependencies.remove("plugins")
+
+            // Add plugins
+            if (plugins) {
+                project.dependencies {
+                    plugins.each { key, value ->
+                        implementation "co.median.android.plugins:${key}:${value}"
+                        logger.info("Added plugin dependency: co.median.android.plugins:${key}:${value}")
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Failed to parse dependencies.json: ${e.message}")
+        }
+    }
+}
+
+def gonativeModules = new GoNativeModules(logger)
+
+ext.applyModulesSettingsGradle = { DefaultSettings defaultSettings ->
+    // Scan for local plugins and add them to settings
+    gonativeModules.scanLocalPlugins()
+    gonativeModules.addModuleProjects(defaultSettings)
+}
+
+ext.applyNativeModulesAppBuildGradle = { Project project ->
+    System.setProperty("user.dir", project.rootDir.toString())
+
+    // Add compiled plugin AAR dependencies (dependencies.json)
+    gonativeModules.addPluginDependenciesFromJson(project)
+
+    // Add local (symlinked) plugin module dependencies
+    gonativeModules.scanLocalPlugins()
+    gonativeModules.addLocalModuleDependencies(project)
+
+    android {
+        packaging {
+            resources {
+                // build-time discovery metadata only; not needed in the APK
+                excludes += 'META-INF/plugin-metadata.json'
+            }
+        }
+    }
+}
